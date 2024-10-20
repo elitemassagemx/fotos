@@ -1,0 +1,916 @@
+/* Importaciones */
+@import url('galeria.css');
+
+:root {
+    --primary-color: #D4AF37;
+    --secondary-color: #8B4513;
+    --text-color: #333;
+    --background-color: #f4e7d2;
+    --item-background: #f0f0f0;
+    --header-background: #191919;
+    --main-blue: #082032;
+    --gold: #FFD700;
+}
+
+/* Reset y estilos base */
+body, h1, h2, h3, p, ul {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Quattrocento', serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    padding-bottom: 60px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding-top: 60px; /* Ajustado para el header fijo */
+}
+
+h1, h2, h3 {
+    font-family: 'Tenor Sans', sans-serif;
+}
+
+h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a, button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+/* Contenedor principal */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+    padding-top: 10px;
+}
+
+/* Header y navegación */
+#main-header {
+    background-color: var(--header-background);
+    color: white;
+    padding: 5px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-right: 10px;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* Secciones */
+.section {
+    padding: 20px 0;
+    margin-bottom: 10px;
+}
+
+.hero {
+    background-color: transparent;
+    text-align: center;
+    padding: 60px 0;
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* Estilos para el toggle de categoría de servicio */
+.service-category-toggle {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    background-color: var(--item-background);
+    border-radius: 20px;
+    padding: 5px;
+    position: static;
+    top: auto;
+    z-index: auto;
+    background-color: transparent;
+}
+
+.service-category-toggle input[type="radio"] {
+    display: none;
+}
+
+.service-category-toggle label {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: 15px;
+}
+
+.service-category-toggle input[type="radio"]:checked + label {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+/* Estilos para las barras de navegación de beneficios y paquetes */
+.benefits-nav, .package-nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: auto;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: static;
+    top: auto;
+    z-index: auto;
+    background-color: transparent;
+}
+
+.benefits-nav::-webkit-scrollbar, .package-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.benefit-btn, .package-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 5px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: transform 0.3s;
+    min-width: 60px;
+}
+
+.benefit-btn img, .package-btn img {
+    width: 48px;
+    height: 48px;
+    display: block;
+    margin: 0 auto 5px;
+}
+
+.benefit-btn span, .package-btn span {
+    font-size: 12px;
+    text-align: center;
+    word-wrap: break-word;
+    max-width: 100%;
+    line-height: 1.2;
+}
+
+.benefit-btn.active, .package-btn.active {
+    transform: scale(1.1);
+}
+
+/* Grids de servicios y paquetes */
+.services-grid, #package-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+.service-item, .package-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    padding: 1.5rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+.service-background, .package-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.7);
+    z-index: 0;
+}
+
+.service-content, .package-content {
+    position: relative;
+    z-index: 1;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.service-item:hover, .package-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(212, 175, 55, 0.4);
+}
+
+.service-item h3, .package-item h3 {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.service-icon, .benefit-icon, .duration-icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
+}
+
+.service-item p, .package-item p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.benefits-container, .duration-container,
+.package-includes, .package-duration, .package-benefits {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.5em;
+}
+
+.benefits-container img, .package-benefits img {
+    margin-right: 10px;
+    width: 48px;
+    height: 48px;
+}
+
+.saber-mas-button {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 1rem;
+    flex: 1;
+    margin: 0 5px;
+    max-width: 150px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.saber-mas-button:hover {
+    background-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Estilos para la sección de testimonios */
+.testimonials {
+    background-color: var(--background-color);
+    padding: 3rem 0;
+}
+
+.testimonial {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.testimonial p {
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.testimonial .author {
+    text-align: right;
+    font-weight: bold;
+}
+
+/* Estilos para la galería interactiva */
+.gallery-carousel {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.gallery-carousel .carousel-item img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+}
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    height: 200px;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 1rem;
+    text-align: center;
+}
+
+.gallery-item:hover .image-overlay {
+    opacity: 1;
+}
+
+.image-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.image-description {
+    font-size: 0.9rem;
+    display: none;
+}
+
+/* Estilos para el popup */
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+}
+
+.popup-content {
+    position: relative;
+    background-color: var(--background-color);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    color: var(--text-color);
+}
+
+.popup-content h2 {
+    margin: 1rem 0;
+    color: var(--primary-color);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.popup-content p {
+    margin-bottom: 1.5rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+#popup-image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+.popup-details {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.popup-benefits, .popup-includes {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.popup-benefits-item, .popup-includes-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.popup-benefits-item img, .popup-includes-item img {
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+}
+
+.popup-duration {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.whatsapp-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #25D366;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 20px;
+    margin-top: 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.whatsapp-button:hover {
+    background-color: #128C7E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.whatsapp-button img {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Continuación de los estilos para la barra fija */
+.fixed-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--header-background);
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.fixed-bar ul {
+    display: flex;
+    justify-content: space-around;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.fixed-bar li {
+    text-align: center;
+}
+
+.fixed-bar a {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px;
+}
+
+.nav-icon {
+    width: 32px;
+    height: 32px;
+    display: block;
+    margin: 0 auto 5px;
+}
+
+.nav-text {
+    font-size: 10px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    max-width: 80px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Footer styles */
+footer {
+    background-color: var(--item-background);
+    color: var(--text-color);
+    padding: 20px 0;
+    text-align: center;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.social-media {
+    margin-top: 10px;
+}
+
+.social-media a {
+    color: var(--primary-color);
+    margin: 0 10px;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    max-height: 80%;
+}
+
+.modal-description {
+    margin-top: 15px;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .services-grid, #package-list {
+        grid-template-columns: 1fr;
+    }
+
+    .popup-content {
+        width: 90%;
+        margin: 10% auto;
+    }
+
+    .footer-content {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero h2 {
+        font-size: 2rem;
+    }
+
+    .service-item, .package-item {
+        padding: 1rem;
+    }
+
+    .benefit-btn, .package-btn {
+        min-width: 60px;
+    }
+
+    .benefit-btn img, .package-btn img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .benefit-btn span, .package-btn span {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gallery-item {
+        height: 150px;
+    }
+
+    .package-includes {
+        margin-bottom: 10px;
+    }
+
+    .package-includes strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+}
+
+/* Accessibility focus styles */
+a:focus, button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Contrast adjustments */
+.service-buttons button, .package-item button, .whatsapp-button {
+    color: var(--background-color);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.service-content, .package-content {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Main CTA button styles */
+.cta-button {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+.cta-button:hover {
+    background-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* Additional accessibility adjustments */
+.visually-hidden {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px 1px 1px 1px);
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Additional adjustments */
+.hero + .services {
+    margin-top: 20px;
+}
+
+.package-includes {
+    margin-bottom: 10px;
+}
+
+.package-includes strong {
+    margin-right: 5px;
+}
+
+/* Ver más button styles */
+.ver-mas-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.ver-mas-btn:hover {
+    background-color: var(--gold);
+}
+
+.conocenos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Carousel adjustments */
+.carousel-item {
+    transition: transform 0.6s ease-in-out;
+}
+
+.carousel-item-next:not(.carousel-item-start),
+.active.carousel-item-end {
+    transform: translateX(100%);
+}
+
+.carousel-item-prev:not(.carousel-item-end),
+.active.carousel-item-start {
+    transform: translateX(-100%);
+}
+
+.carousel-item-next.carousel-item-start,
+.carousel-item-prev.carousel-item-end {
+    transform: translateX(0);
+}
+
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.carousel-caption h5,
+.carousel-caption p {
+    color: white;
+}
+
+/* Additional styles for gallery section */
+#galeria {
+    padding-top: 40px;
+}
+
+.gallery-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#conocenos {
+    padding-top: 60px;
+}
+
+#conocenos h3 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Ensure text contrast in gallery items */
+.image-overlay h3,
+.image-overlay p {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Additional styles to ensure text readability */
+.service-item p,
+.package-item p,
+.testimonial p {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Ensure popup text is readable */
+.popup-content p,
+.popup-content h2,
+.popup-benefits-item span,
+.popup-includes-item span,
+.popup-duration span {
+    color: var(--text-color);
+    text-shadow: none;
+}
+
+/* Adjust font for service and package items to match project fonts */
+.service-item,
+.package-item {
+    font-family: 'Quattrocento', serif;
+}
+
+.service-item h3,
+.package-item h3 {
+    font-family: 'Tenor Sans', sans-serif;
+}
+
+/* Fix for carousel image issue */
+.carousel-item {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+}
+
+.carousel-item.active {
+    display: block;
+    position: relative;
+    opacity: 1;
+}
+
+/* Ensure white text in popup windows */
+#imageModal .modal-description,
+.popup-content * {
+    color: white;
+    font-weight: bold;
+}
+
+/* Additional spacing between sections */
+.section + .section {
+    margin-top: 60px;
+}
+
+/* Styles for package navigation */
+.package-nav {
+    margin-bottom: 40px;
+}
+
+.package-btn {
+    background-color: var(--item-background);
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    padding: 10px 15px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.package-btn:hover,
+.package-btn.active {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.package-btn img {
+    width: 24px;
+    height: 24px;
+    margin-right: 5px;
+}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería de Imágenes WEBP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #showAllBtn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #showAllBtn:hover {
+            background-color: #45a049;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .gallery img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <h1>Galería de Imágenes WEBP</h1>
+    <button id="showAllBtn">Mostrar Todas</button>
+    <div id="gallery" class="gallery"></div>
+
+    <script>
+        const baseUrl = "https://elitemassagemx.github.io/Home/IMG/";
+        const galleryElement = document.getElementById('gallery');
+        const showAllBtn = document.getElementById('showAllBtn');
+
+        const possibleFiles = [
+            "AMANCAF.webp", "ANIMO.webp", "AROMA.webp", "BARNIZ.webp", "BIENES.webp",
+            "CEREBRO.webp", "CHOCO2.webp", "CHOCOC.webp", "CHOCOCC.webp", "COPAVIN.webp",
+            "DURAC.webp", "ESPALDFLECH.webp", "ESTRES.webp", "EXPRESO.webp", "FOCUS.webp",
+            "FRAG.webp", "FRASCOVER.webp", "FRESASC.webp", "FRESASC_1.webp", "GALLETAS.webp",
+            "MANOSBIEN.webp", "MASAJES.webp", "OSO.webp", "PAQ.webp", "PIEFLECH.webp",
+            "PIES.webp", "PIZZACHAMCIR.webp", "PLANT.webp", "QUESOS.webp", "QUESOSAHM.webp",
+            "QUESOSH.webp", "QUESOSHM.webp", "QUESOSIG.webp", "QUESOSM.webp", "QUESOSMM.webp",
+            "RELAJACION.webp", "ROSAS.webp", "SELECCION PIZZAS.webp", "SELECQUES.webp", "SILLAS.webp",
+            "SILLASH.webp", "SONRISA.webp", "TALAQUES.webp", "TARTA.webp", "TARTA2.webp",
+            "TESTI.webp", "WhatsApp Image 2024-10-11 at 1.17.53 PM (4)-fotor-bg-remover-20241011143242.webp",
+            "algas.webp", "android-chrome-192x192.webp", "android-chrome-512x512.webp", "animo2.webp",
+            "apple-touch-icon.webp", "atras.webp", "atrasm.webp", "bat.webp", "benefits-icon1.webp",
+            "benefits-icon2.webp", "billet.webp", "buda.webp", "buda2.webp", "c30min.webp",
+            "cafep.webp", "calen.webp", "camas2.webp", "camass.webp", "camp.webp",
+            "ccirculacion.webp", "cculinario.webp", "cdetox.webp", "cdolorespalda.webp", "cel.webp",
+            "cequilibrio.webp", "cer.webp", "cfragancia morado naranja.webp", "cfragancia2.webp", "check.webp",
+            "chen.webp", "chidratacion.webp", "choco.webp", "cinflamacion.webp", "cmasaje lomi.webp",
+            "comco.webp", "coment.webp", "comentari.webp", "copas.webp", "copasg.webp",
+            "coracaja.webp", "corago.webp", "correos.webp", "cpastel.webp", "cpastel4.webp",
+            "cpiedrasflroesvelasrosa.webp", "crebanadapiequeso.webp", "csuecia.webp", "ctarta.webp", "ctarta2.webp",
+            "cuentanos.webp", "cventosas.webp", "dif.webp", "dorado.webp", "duracionn.webp",
+            "duracioon.webp", "duration-icon.webp", "entradallam.webp", "error.webp", "error_1.webp",
+            "espalda2.webp", "estr.webp", "exp.webp", "fallback-flag.webp", "fotos.webp",
+            "galeria-de-fotos.webp", "galeria.webp", "gota.webp", "gotero.webp", "guard.webp",
+            "guardar.webp", "hablemos.webp", "holistico.webp", "idea.webp", "ideattex.webp",
+            "jam.webp", "jamc.webp", "lab.webp", "lapiz.webp", "lataref.webp",
+            "like.webp", "lista-de-regalos.webp", "lista.webp", "llave.webp", "logo.webp",
+            "lomi.webp", "lujo.webp", "lujo2.webp", "manv.webp", "mas.webp",
+            "mejan.webp", "mesap.webp", "mesap2.webp", "mora.webp", "mx.webp",
+            "noche.webp", "noche1.webp", "noct.webp", "och.webp", "ofr.webp",
+            "ois.webp", "omx.webp", "org.webp", "ous.webp", "papas.webp",
+            "paq1.webp", "paq2.webp", "paq41.webp", "paq4o.webp", "paqp.webp",
+            "par.webp", "personal.webp", "personalizaarte.webp", "piedras.webp", "piedras2.webp",
+            "pinmap.webp", "pinsuecia.webp", "pizcha.webp", "pizzs.webp", "planta.webp",
+            "rcaromaterapia.webp", "recomend.webp", "recos.webp", "reflexologia2.webp", "reg.webp",
+            "regalo.webp", "reserva.webp", "reservaa.webp", "rhlomi.webp", "rhpiedrasfloresvela.webp",
+            "rhpiedrasfrias.webp", "rhreflexologia.webp", "rhsuecia.webp", "rosa.webp", "rosal.webp",
+            "rosao.webp", "rosasic.webp", "semillas.webp", "serv.webp", "sig.webp",
+            "sol.webp", "spa.webp", "sqaromasflor.webp", "sqaromaterapiaroja.webp", "sqdifusoraromaterapia.webp",
+            "sqflormanos.webp", "sqfragancias.webp", "sqfrutas.webp", "sqpieblanco.webp", "sqpierna.webp",
+            "sqquesoyvino.webp", "sqsensorial.webp", "sqvelasaromaticamorada.webp", "start.webp", "sub.webp",
+            "tazaaa.webp", "toggprem.webp", "tomarf.webp", "trad.webp", "union.webp",
+            "us.webp", "vaso.webp", "vela.webp", "verificado.webp", "vingold.webp",
+            "vip.webp", "whatsapp.webp"
+        ];
+
+        function checkImageExists(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(url);
+                img.onerror = () => reject();
+                img.src = url;
+            });
+        }
+
+        async function showAllImages() {
+            galleryElement.innerHTML = '';
+            const promises = possibleFiles.map(file => checkImageExists(baseUrl + file));
+            
+            try {
+                const results = await Promise.allSettled(promises);
+                results.forEach((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        const img = document.createElement('img');
+                        img.src = result.value;
+                        img.alt = possibleFiles[index];
+                        img.title = possibleFiles[index];
+                        galleryElement.appendChild(img);
+                    }
+                });
+            } catch (error) {
+                console.error("Error loading images:", error);
+            }
+        }
+
+        showAllBtn.addEventListener('click', showAllImages);
+    </script>
+</body>
+</html>

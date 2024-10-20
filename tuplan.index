@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personaliza tu experiencia de masaje perfecta en Elite Massage. Crea un plan a tu medida y disfruta de un oasis de tranquilidad único.">
+    <title>Tu Plan Personalizado - Elite Massage</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <!-- Web Manifest -->
+    <link rel="manifest" href="site.webmanifest">
+</head>
+<body>
+    <header id="main-header" class="fixed-header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo-container">
+                    <img src="https://elitemassagemx.github.io/Home/ICONOS/logo.png" alt="Elite Massage Logo" class="logo" onerror="this.onerror=null; this.src='https://elitemassagemx.github.io/Home/ICONOS/fallback-logo.png';">
+                    <h1>Elite Massage</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main role="main">
+        <section id="tu-plan" class="section tu-plan">
+            <div class="container">
+                <h2>Crea Tu Experiencia Perfecta</h2>
+                <p class="intro">En Elite Massage, creemos que cada momento de relajación debe ser tan único como tú. Personaliza tu experiencia ideal y déjanos crear un oasis de tranquilidad a tu medida.</p>
+                
+                <form id="plan-form" class="plan-form">
+                    <h3>Tipo de Experiencia</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="regalar">
+                            <span>Para regalar</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="romantica">
+                            <span>Romántica</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="degustacion">
+                            <span>Degustación Gourmet</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="belleza">
+                            <span>Belleza</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="desintoxicacion">
+                            <span>Desintoxicación y renovación</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="celebracion">
+                            <span>Celebración especial</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="experiencia" value="otro">
+                            <span>Otro</span>
+                        </label>
+                    </div>
+                    <div id="otro-experiencia">
+                        <input type="text" name="otra-experiencia" placeholder="Describe tu experiencia">
+                    </div>
+
+                    <h3>Duración deseada</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="radio" name="duracion" value="60">
+                            <span>60 minutos</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="duracion" value="90">
+                            <span>90 minutos</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="duracion" value="120">
+                            <span>120 minutos</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="duracion" value="240">
+                            <span>Medio día (4 horas)</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="duracion" value="360">
+                            <span>Día completo (6+ horas)</span>
+                        </label>
+                    </div>
+
+                    <h3>Preferencias de Masaje</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="checkbox" name="masaje" value="aromaterapia">
+                            <span>Aromaterapia</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="masaje" value="piedras-calientes">
+                            <span>Piedras calientes</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="masaje" value="sueco">
+                            <span>Masaje sueco</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="masaje" value="reflexologia">
+                            <span>Reflexología</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="masaje" value="lomi-lomi">
+                            <span>Lomi Lomi</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="masaje" value="cbd">
+                            <span>Masaje con aceites CBD</span>
+                        </label>
+                    </div>
+
+                    <h3>Extras</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="checkbox" name="extras" value="manicura">
+                            <span>Cuidado de uñas (manicura/pedicura)</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="extras" value="facial">
+                            <span>Tratamiento facial</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="extras" value="envoltura">
+                            <span>Envoltura corporal</span>
+                        </label>
+                    </div>
+
+                    <h3>Experiencia Culinaria</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="checkbox" name="culinaria" value="quesos-vinos">
+                            <span>Selección de quesos y vinos</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="culinaria" value="fresas-chocolate">
+                            <span>Fresas con chocolate</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="culinaria" value="cafe-pasteleria">
+                            <span>Café gourmet y pastelería</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="culinaria" value="almuerzo-saludable">
+                            <span>Almuerzo saludable</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="checkbox" name="culinaria" value="cena-romantica">
+                            <span>Cena romántica</span>
+                        </label>
+                    </div>
+
+                    <h3>Ocasión Especial (opcional)</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="radio" name="ocasion" value="aniversario">
+                            <span>Aniversario</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="ocasion" value="cumpleanos">
+                            <span>Cumpleaños</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="ocasion" value="despedida">
+                            <span>Despedida de soltera/o</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="ocasion" value="luna-miel">
+                            <span>Luna de miel</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="ocasion" value="porque-si">
+                            <span>Simplemente porque sí</span>
+                        </label>
+                    </div>
+
+                    <h3>Número de personas</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="radio" name="personas" value="individual">
+                            <span>Individual</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="personas" value="pareja">
+                            <span>Pareja</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="personas" value="grupo">
+                            <span>Grupo pequeño en pares (3-5 personas)</span>
+                        </label>
+                    </div>
+
+                    <h3>Presupuesto aproximado</h3>
+                    <div class="option-group">
+                        <label class="option-item">
+                            <input type="radio" name="presupuesto" value="$">
+                            <span>$</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="presupuesto" value="$$">
+                            <span>$$</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="presupuesto" value="$$$">
+                            <span>$$$</span>
+                        </label>
+                    </div>
+
+                    <h3>Algo que quieras agregar:</h3>
+                    <textarea name="comentarios" rows="4" placeholder="Escribe aquí cualquier detalle o solicitud especial"></textarea>
+
+                    <h3>Información de contacto</h3>
+                    <div class="contact-form">
+                        <input type="text" name="nombre" placeholder="Nombre" required>
+                        <input type="tel" name="telefono" placeholder="Teléfono" required>
+                        <input type="email" name="email" placeholder="Correo electrónico" required>
+                        <input type="date" name="fecha" placeholder="Fecha preferida para la experiencia" required>
+                    </div>
+                    <div class="contact-preference">
+                        <h4>Medio de contacto preferido:</h4>
+                        <label class="option-item">
+                            <input type="radio" name="contacto" value="llamada">
+                            <span>Te marcamos</span>
+                        </label>
+                        <label class="option-item">
+                            <input type="radio" name="contacto" value="whatsapp">
+                            <span>Te mandamos mensaje por WhatsApp</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="submit-btn">Crear Mi Experiencia Perfecta</button>
+                    <button type="button" class="save-progress-btn" data-tooltip="Guarda tu progreso para continuar más tarde">Guardar Progreso</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Elite Massage. Todos los derechos reservados.</p>
+            <div class="social-media">
+                <a href="https://facebook.com/elitemassage" target="_blank" rel="noopener noreferrer">Facebook</a> |
+                <a href="https://instagram.com/elitemassage" target="_blank" rel="noopener noreferrer">Instagram</a> |
+                <a href="https://twitter.com/elitemassage" target="_blank" rel="noopener noreferrer">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="tu-plan.js"></script>
+</body>
+</html>

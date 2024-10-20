@@ -1,0 +1,151 @@
+/* Estilos existentes ... */
+
+/* Estilos para Tu Plan */
+.tu-plan {
+    padding-top: 80px;
+}
+
+.plan-form {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--background-color);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.form-progress {
+    height: 5px;
+    background-color: #e0e0e0;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.form-step {
+    display: none;
+}
+
+.option-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.option-item:hover {
+    background-color: #e0e0e0;
+}
+
+.option-item input {
+    margin-right: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+textarea, input[type="text"], input[type="tel"], input[type="email"], input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.nav-btn, .submit-btn {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.nav-btn:hover, .submit-btn:hover {
+    background-color: var(--gold);
+}
+
+.contact-preference {
+    margin-top: 20px;
+}
+
+/* Estilos para el toggle personalizado */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .option-group {
+        flex-direction: column;
+    }
+    
+    .option-item {
+        width: 100%;
+    }
+}

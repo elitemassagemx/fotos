@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería de Imágenes WEBP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        #showAllBtn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #showAllBtn:hover {
+            background-color: #45a049;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .gallery img {
+            width: 200px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <h1>Galería de Imágenes WEBP</h1>
+    <button id="showAllBtn">Mostrar Todas</button>
+    <div id="gallery" class="gallery"></div>
+
+    <script>
+        const baseUrl = "https://elitemassagemx.github.io/Home/IMGW/";
+        const galleryElement = document.getElementById('gallery');
+        const showAllBtn = document.getElementById('showAllBtn');
+
+        const possibleFiles = [
+            "aa1.webp", "ab1.webp", "ab11.webp", "ab2.webp", "ab3.webp", "ab4.webp", "abb.webp",
+            "abu1.webp", "abu2.webp", "abu3.webp", "ac1.webp", "ac2.webp", "ac3.webp", "ac4.webp",
+            "ac5.webp", "aca.webp", "aca2.webp", "ach.webp", "ach1.webp", "ach2.webp", "ach2D.webp",
+            "ach3.webp", "ad.webp", "ad10.webp", "ad12.webp", "ad2.webp", "ad3.webp", "ad5.webp",
+            "ad6.webp", "ad7.webp", "ad8.webp", "ad9.webp", "addd.webp", "adddd.webp", "addddd.webp",
+            "adf1.webp", "ae.webp", "ae1.webp", "ae13.webp", "ae14.webp", "ae15.webp", "ae16.webp",
+            "ae2.webp", "ae22.webp", "ae33.webp", "ae44.webp", "ae4ever.webp", "ae6.webp", "ae77.webp",
+            "aee.webp", "aee1.webp", "aee2.webp", "aeee.webp", "af.webp", "af1.webp", "af2.webp",
+            "af3.webp", "aff2.webp", "afl.webp", "afl2.webp", "afl4.webp", "aflD4.webp", "ah.webp",
+            "ah1.webp", "ah2.webp", "ah3.webp", "ah4.webp", "ah5.webp", "ah52.webp", "ah6.webp",
+            "ah7.webp", "ah8.webp", "ah9.webp", "ahh.webp", "ahs2.webp", "aluz.webp", "am.webp",
+            "am1.webp", "am2.webp", "am21.webp", "am3.webp", "am4.webp", "am5.webp", "am6.webp",
+            "am7.webp", "amm.webp", "ammm.webp", "amr.webp", "amr1.webp", "amrr.webp", "ap.webp",
+            "ap1.webp", "ap2.webp", "apm.webp", "app.webp", "aps.webp", "apsd.webp", "arm.webp",
+            "arm6.webp", "arr.webp", "as.webp", "as1.webp", "as2.webp", "asdf.webp", "at.webp",
+            "au1.webp", "au2.webp", "au3.webp", "au5.webp", "auc1.webp", "auu.webp", "av.webp",
+            "av11.webp", "av12.webp", "avv.webp", "aw1.webp", "aw2.webp", "aw22.webp", "aw3.webp",
+            "e12.webp", "ser.webp"
+        ];
+
+        function checkImageExists(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(url);
+                img.onerror = () => reject();
+                img.src = url;
+            });
+        }
+
+        async function showAllImages() {
+            galleryElement.innerHTML = '';
+            const promises = possibleFiles.map(file => checkImageExists(baseUrl + file));
+            
+            try {
+                const results = await Promise.allSettled(promises);
+                results.forEach((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        const img = document.createElement('img');
+                        img.src = result.value;
+                        img.alt = possibleFiles[index];
+                        img.title = possibleFiles[index];
+                        galleryElement.appendChild(img);
+                    }
+                });
+            } catch (error) {
+                console.error("Error loading images:", error);
+            }
+        }
+
+        showAllBtn.addEventListener('click', showAllImages);
+    </script>
+</body>
+</html>
