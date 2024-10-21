@@ -635,51 +635,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function setupGallery() {
-        const galleryGrid = document.querySelector('.gallery-grid');
-        const verMasButton = getElement('ver-mas-galeria');
+function setupGallery() {
+    const galleryGrid = document.querySelector('.gallery-grid');
+    const verMasButton = getElement('ver-mas-galeria');
 
-        if (!galleryGrid || !verMasButton) {
-            console.error('Gallery elements not found');
-            return;
-        }
-
-        const galleryImages = [
-            { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
-            { src: 'QUESOSHM.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
-            { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
-            { src: 'paq41.webp', title: 'Paquete Experiencia Total', description: 'Disfruta de una experiencia completa de relajación y bienestar' },
-            { src: 'lujo.webp', title: 'Ambiente de Lujo', description: 'Relájate en nuestro ambiente de lujo diseñado para tu máximo confort' },
-            { src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
-            { src: 'paq2.webp', title: 'Paquete Pareja', description: 'Comparte un momento especial con tu pareja en nuestro spa' },
-            { src: 'semillas.webp', title: 'Masaje con Semillas', description: 'Prueba nuestro innovador masaje con semillas calientes' }
-        ];
-
-        galleryImages.forEach((image, index) => {
-            const galleryItem = document.createElement('div');
-            galleryItem.classList.add('gallery-item');
-            galleryItem.innerHTML = `
-                <img src="${buildImageUrl(image.src)}" alt="${image.title}">
-                <div class="image-overlay">
-                    <h3 class="image-title">${image.title}</h3>
-                    <p class="image-description">${image.description}</p>
-                </div>
-                <a href="#" class="gallery-item-link" aria-label="Ver detalles de ${image.title}">
-                    <span class="visually-hidden">Ver detalles de ${image.title}</span>
-                </a>
-            `;
-            const link = galleryItem.querySelector('.gallery-item-link');
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                showImageDetails(image, index);
-            });
-            galleryGrid.appendChild(galleryItem);
-        });
-
-        verMasButton.addEventListener('click', () => {
-            window.location.href = 'galeria.html';
-        });
+    if (!galleryGrid || !verMasButton) {
+        console.error('Gallery elements not found');
+        return;
     }
+
+    // Limpiamos el contenido existente de la galería
+    galleryGrid.innerHTML = '';
+
+    const galleryImages = [
+        { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
+        { src: 'QUESOSHM.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+        { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
+        { src: 'paq41.webp', title: 'Paquete Experiencia Total', description: 'Disfruta de una experiencia completa de relajación y bienestar' },
+        { src: 'lujo.webp', title: 'Ambiente de Lujo', description: 'Relájate en nuestro ambiente de lujo diseñado para tu máximo confort' },
+        { src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
+        { src: 'paq2.webp', title: 'Paquete Pareja', description: 'Comparte un momento especial con tu pareja en nuestro spa' },
+        { src: 'semillas.webp', title: 'Masaje con Semillas', description: 'Prueba nuestro innovador masaje con semillas calientes' }
+    ];
+
+    // Limitamos a mostrar solo 3 imágenes en la página principal
+    const imagesToShow = galleryImages.slice(0, 3);
+
+    imagesToShow.forEach((image, index) => {
+        const galleryItem = document.createElement('div');
+        galleryItem.classList.add('gallery-item');
+        galleryItem.innerHTML = `
+            <img src="${buildImageUrl(image.src)}" alt="${image.title}">
+            <div class="image-overlay">
+                <h3 class="image-title">${image.title}</h3>
+                <p class="image-description">${image.description}</p>
+            </div>
+            <a href="#" class="gallery-item-link" aria-label="Ver detalles de ${image.title}">
+                <span class="visually-hidden">Ver detalles de ${image.title}</span>
+            </a>
+        `;
+        const link = galleryItem.querySelector('.gallery-item-link');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            showImageDetails(image, index);
+        });
+        galleryGrid.appendChild(galleryItem);
+    });
+
+    verMasButton.addEventListener('click', () => {
+        window.location.href = 'galeria.html';
+    });
+}
+
 
     function showImageDetails(image, index) {
         const modal = getElement('imageModal');
