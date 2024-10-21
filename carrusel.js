@@ -1,13 +1,18 @@
 // carrusel.js
 document.addEventListener('DOMContentLoaded', function() {
+    loadCarouselContent();
+});
+
+function loadCarouselContent() {
     fetch('carrusel.html')
         .then(response => response.text())
         .then(data => {
             document.getElementById('carrusel-container').innerHTML = data;
-            initCarousel();
+            // Use a small delay to ensure the content is rendered before initializing
+            setTimeout(initCarousel, 100);
         })
         .catch(error => console.error('Error loading carousel:', error));
-});
+}
 
 function initCarousel() {
     const carousel = document.getElementById('carrusel-container');
@@ -21,6 +26,8 @@ function initCarousel() {
         console.error('No carousel items found');
         return;
     }
+
+    console.log(`Found ${items.length} carousel items`);
 
     const prevBtn = carousel.querySelector('.carousel-control.prev');
     const nextBtn = carousel.querySelector('.carousel-control.next');
@@ -80,4 +87,5 @@ function initCarousel() {
 
     // Iniciar el carrusel
     showSlide(0);
+    console.log('Carousel initialized');
 }
