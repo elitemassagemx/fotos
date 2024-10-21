@@ -1,99 +1,122 @@
-/* Estilos existentes ... */
-
-/* Estilos para Tu Plan */
-.tu-plan {
-    padding-top: 80px;
+:root {
+    --primary-color: #8a6d3b;
+    --secondary-color: #d4af37;
+    --background-color: #f9f5ea;
+    --text-color: #333;
+    --border-color: #ccc;
 }
 
-.plan-form {
-    max-width: 800px;
-    margin: 0 auto;
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
     background-color: var(--background-color);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin: 0;
+    padding: 0;
 }
 
-.form-progress {
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    color: var(--primary-color);
+}
+
+.progress-container {
+    width: 100%;
     height: 5px;
-    background-color: #e0e0e0;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    overflow: hidden;
+    background: #f0f0f0;
 }
 
 .progress-bar {
     height: 100%;
-    background-color: var(--primary-color);
+    background: var(--secondary-color);
+    width: 0%;
     transition: width 0.3s ease;
+}
+
+.tu-plan {
+    padding-top: 100px;
+    padding-bottom: 50px;
+}
+
+.plan-form {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-top: 30px;
 }
 
 .form-step {
     display: none;
 }
 
+.form-step.active {
+    display: block;
+}
+
 .option-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
     margin-bottom: 20px;
 }
 
 .option-item {
+    flex: 1 1 calc(50% - 15px);
+    background-color: #f9f9f9;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    justify-content: space-between;
 }
 
 .option-item:hover {
-    background-color: #e0e0e0;
+    background-color: #f0f0f0;
 }
 
-.option-item input {
+.option-item input[type="radio"],
+.option-item input[type="checkbox"] {
     margin-right: 10px;
 }
 
-.hidden {
-    display: none;
-}
-
-textarea, input[type="text"], input[type="tel"], input[type="email"], input[type="date"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.form-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.nav-btn, .submit-btn {
-    padding: 10px 20px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.nav-btn:hover, .submit-btn:hover {
-    background-color: var(--gold);
-}
-
-.contact-preference {
-    margin-top: 20px;
-}
-
-/* Estilos para el toggle personalizado */
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -132,20 +155,78 @@ textarea, input[type="text"], input[type="tel"], input[type="email"], input[type
 }
 
 input:checked + .toggle-slider {
-    background-color: var(--primary-color);
+    background-color: var(--secondary-color);
 }
 
 input:checked + .toggle-slider:before {
     transform: translateX(26px);
 }
 
-/* Ajustes responsivos */
+textarea, input[type="text"], input[type="tel"], input[type="email"], input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.nav-btn, .submit-btn, .save-progress-btn {
+    padding: 12px 25px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.nav-btn:hover, .submit-btn:hover, .save-progress-btn:hover {
+    background-color: var(--secondary-color);
+}
+
+.hidden {
+    display: none;
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.social-media a {
+    color: white;
+    font-size: 20px;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.social-media a:hover {
+    color: var(--secondary-color);
+}
+
 @media (max-width: 768px) {
-    .option-group {
-        flex-direction: column;
+    .option-item {
+        flex: 1 1 100%;
     }
     
-    .option-item {
+    .form-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .nav-btn, .submit-btn, .save-progress-btn {
         width: 100%;
     }
 }
