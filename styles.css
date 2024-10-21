@@ -516,7 +516,7 @@ h1 {
     cursor: pointer;
 }
 
-/* Estilos para la barra fija */
+/* Estilos para la barra fija (continuación) */
 .fixed-bar {
     position: fixed;
     bottom: 0;
@@ -1017,4 +1017,25 @@ a:focus, button:focus {
     .section + .section {
         margin-top: 15px;
     }
+}
+
+/* Compatibility fixes */
+.fa-rotate-90, .fa-rotate-180, .fa-rotate-270, .fa-flip-horizontal, .fa-flip-both, .fa-flip-vertical {
+    filter: none; /* Reemplazar con el valor apropiado según la rotación o flip deseado */
+}
+
+.benefits-nav::-webkit-scrollbar, 
+.package-nav::-webkit-scrollbar,
+#carrusel-container .image-nav-container::-webkit-scrollbar {
+    display: none;
+}
+
+.form-check-input {
+    print-color-adjust: exact;
+}
+
+/* Ensure proper text alignment */
+th {
+    text-align: inherit;
+    text-align: -webkit-match-parent;
 }
