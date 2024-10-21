@@ -177,7 +177,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         console.log(`Rendered ${services[category].length} services`);
     }
+function loadPaqcarrContent() {
+    fetch('paqcarr.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('paqcarr-container').innerHTML = data;
+            // Llama a una función para inicializar el carrusel de paquetes si es necesario
+            initPaqcarr();
+        })
+        .catch(error => console.error('Error loading paqcarr:', error));
+}
 
+// Llama a esta función en init() o donde sea apropiado
+function init() {
+    loadJSONData();
+    setupPopup();
+    setupGalleryAnimations();
+    setupGalleryModal();
+    setupGallery();
+    loadCarouselContent();
+    loadPaqcarrContent(); // Añade esta línea
+}
     function renderPackages() {
         console.log('Rendering packages');
         const packageList = getElement('package-list');
