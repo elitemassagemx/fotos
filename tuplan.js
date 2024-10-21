@@ -1,32 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('plan-form');
-    const steps = Array.from(form.querySelectorAll('.form-step'));
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
-    const formProgressBar = document.getElementById('formProgressBar');
-    const headerProgressBar = document.getElementById('headerProgressBar');
     const saveProgressBtn = document.querySelector('.save-progress-btn');
-    let currentStep = 0;
 
-    function showStep(stepIndex) {
-        steps.forEach((step, index) => {
-            step.classList.toggle('active', index === stepIndex);
-        });
-        prevBtn.style.display = stepIndex === 0 ? 'none' : 'inline-block';
-        nextBtn.style.display = stepIndex === steps.length - 1 ? 'none' : 'inline-block';
-        submitBtn.style.display = stepIndex === steps.length - 1 ? 'inline-block' : 'none';
-        updateProgressBar();
-    }
-
-    function updateProgressBar() {
-        const progress = ((currentStep + 1) / steps.length) * 100;
-        if (formProgressBar) formProgressBar.style.width = `${progress}%`;
-        if (headerProgressBar) headerProgressBar.style.width = `${progress}%`;
-    }
-
-    function validateStep(step) {
-        const inputs = step.querySelectorAll('input[required], select[required], textarea[required]');
+    function validateForm() {
+        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
         let isValid = true;
         inputs.forEach(input => {
             if (!input.value.trim()) {
@@ -58,26 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            if (validateStep(steps[currentStep])) {
-                currentStep++;
-                showStep(currentStep);
-            }
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            currentStep--;
-            showStep(currentStep);
-        });
-    }
-
     if (submitBtn) {
         submitBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (validateStep(steps[currentStep])) {
+            if (validateForm()) {
                 showFormPreview();
             }
         });
@@ -97,8 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         closeBtn.addEventListener('click', () => {
             thankYouMessage.remove();
             form.reset();
-            currentStep = 0;
-            showStep(currentStep);
         });
     }
 
@@ -198,7 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
         let message = "Hola! Me gustaría reservar una experiencia personalizada en Elite Massage:\n\n";
 
-        // Mapeo de nombres de campos a etiquetas legibles
         const fieldLabels = {
             'tipo-evento': 'Tipo de evento',
             'numero-personas': 'Número de personas',
@@ -219,11 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (value) {
                 const label = fieldLabels[key] || key;
                 if (key === 'obsequios') {
-                    // Para checkboxes, podemos tener múltiples valores
                     const obsequios = formData.getAll('obsequios');
                     message += `${label}: ${obsequios.join(', ')}\n`;
                 } else if (key === 'decoracion-tematica' || key === 'musica' || key === 'catering') {
-                    // Para toggles, convertimos a Sí/No
                     message += `${label}: ${value === 'on' ? 'Sí' : 'No'}\n`;
                 } else {
                     message += `${label}: ${value}\n`;
@@ -236,7 +193,4 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
         window.open(url, '_blank');
     }
-
-    // Inicializar
-    showStep(currentStep);
 });
