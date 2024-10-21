@@ -93,6 +93,29 @@
         <section id="paquetes" class="section packages">
             <div class="container">
                 <h2>Nuestros Paquetes</h2>
+                <div id="paqcarr-container"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('paqcarr.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('paqcarr-container').innerHTML = data;
+            
+            // Cargar y ejecutar el script paqcarr.js
+            var script = document.createElement('script');
+            script.src = 'paqcarr.js';
+            document.head.appendChild(script);
+            
+            // Cargar los estilos paqcarr.css
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'paqcarr.css';
+            document.head.appendChild(link);
+        })
+        .catch(error => console.error('Error loading paqcarr:', error));
+});
+</script>
+                
                 <div class="package-nav">
                     <!-- Los botones de navegación de paquetes se generarán dinámicamente con JavaScript -->
                 </div>
