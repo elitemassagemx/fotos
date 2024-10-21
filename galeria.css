@@ -5,6 +5,9 @@
 body {
   margin: 5px;
   position: relative;
+  /* Remove webkit-specific property */
+  /* -webkit-text-size-adjust: 100%; */
+  text-size-adjust: 100%;
 }
 
 #gallery {
@@ -15,37 +18,34 @@ body {
 }
 
 #gallery > div {
-  position: relative;
   overflow: hidden;
+  position: relative;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-#gallery > div img {
+#gallery > div > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: filter 0.3s ease;
-}
-
-#gallery > div:nth-child(5n + 1) {
-  grid-column: span 2;
+  transition: all ease 1s;
 }
 
 #gallery > div > a {
   opacity: 0;
   position: absolute;
   color: #000;
-  background-color: rgba(0, 0, 0, 0.5);
-  font: bold 1em "Helvetica";
+  background-color: #000;
+  font: bold 4em "Helvetica";
   text-shadow: 0 -1px 5px #fff, -1px 0px 5px #fff, 0 1px 5px #fff, 1px 0px 5px #fff;
-  padding: 0.5rem;
+  padding: 2rem;
+  mix-blend-mode: difference;
   width: 100%;
   height: 100%;
+  transition: all ease 1s;
   display: flex;
   justify-content: center;
   align-items: center;
   text-decoration: none;
-  transition: opacity 0.3s ease;
 }
 
 #gallery > div:hover img {
@@ -57,13 +57,22 @@ body {
 }
 
 /* Lightbox styles */
+[id^="lightbox-"]:target {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[id^="lightbox-"]:target img {
+  filter: blur(0);
+}
+
 [id^="lightbox-"] {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   opacity: 0;
   transition: opacity 450ms ease-in-out;
@@ -72,22 +81,24 @@ body {
   pointer-events: none;
 }
 
-[id^="lightbox-"]:target {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 #lightbox .content {
   max-width: 90%;
   position: relative;
   color: #fff;
 }
 
-#lightbox img {
-  max-height: 90vh;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
+#lightbox .content:hover > a.close {
+  opacity: 1;
+  transform: scale(1, 1);
+}
+
+#lightbox .content:hover > .title {
+  opacity: 1;
+  transform: translateY(-3px);
+}
+
+#lightbox .content > * {
+  transition: all 450ms ease-in-out;
 }
 
 #lightbox .title {
@@ -97,27 +108,51 @@ body {
   position: absolute;
   bottom: 0;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  font-size: 1.2em;
+  transform: translateY(50%);
+  font-size: 1.5em;
+  opacity: 0;
+}
+
+#lightbox img {
+  max-height: 90vh;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  filter: blur(50px);
 }
 
 #lightbox a.close {
+  width: 2em;
+  height: 2em;
   position: absolute;
-  right: 10px;
-  top: 10px;
-  width: 30px;
-  height: 30px;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #fff;
+  right: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0, 0);
+  opacity: 0;
+  transform-origin: right top;
   text-decoration: none;
-  text-align: center;
-  line-height: 30px;
-  border-radius: 50%;
+  color: #fff;
 }
 
 #lightbox a.close::after {
-  content: "×";
-  font-size: 1.5em;
+  content: "X";
+}
+
+/* Accessibility improvements */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Responsive adjustments */
@@ -126,22 +161,36 @@ body {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  #gallery > div:nth-child(5n + 1) {
-    grid-column: span 1;
-  }
-
   #gallery > div:nth-child(6n + 1) {
     grid-column: span 2;
     grid-row: span 2;
   }
 
-  #gallery > div > a {
-    font-size: 1.2em;
+  #gallery > div:nth-child(2) {
+    grid-column: span 3;
+    grid-row: span 3;
+  }
+
+  #gallery > div:nth-child(4) {
+    grid-column: span 1;
+    grid-row: span 2;
   }
 }
 
 @media (min-width: 1024px) {
   #gallery {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
+    height: calc(100vh - 10px);
+  }
+}
+
+@media (max-width: 767px) {
+  #gallery > div:nth-child(5n + 1) {
+    grid-column: span 2;
+  }
+
+  #gallery > div > a {
+    font-size: 2em;
+    padding: 1rem;
   }
 }
