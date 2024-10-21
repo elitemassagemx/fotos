@@ -230,3 +230,39 @@ footer {
         width: 100%;
     }
 }
+
+/* Añadir estos estilos al archivo CSS existente */
+
+.preview-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+.preview-modal h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+.preview-modal ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.preview-modal li {
+    margin-bottom: 10px;
+}
+
+.preview-modal button {
+    margin-top: 20px;
+    margin-right: 10px;
+}
