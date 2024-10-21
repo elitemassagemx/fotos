@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.alt = benefit;
                 const span = document.createElement('span');
                 span.textContent = benefit;
-benefitItem.appendChild(img);
+                benefitItem.appendChild(img);
                 benefitItem.appendChild(span);
                 popupBenefits.appendChild(benefitItem);
             });
@@ -541,78 +541,76 @@ benefitItem.appendChild(img);
         return alternativeTexts[benefit] || benefit;
     }
 
-function setupPackageNav() {
-    const packageNav = document.querySelector('.package-nav');
-    const categoryToggle = document.querySelector('.package-category-toggle');
-    if (!packageNav || !categoryToggle) return;
+    function setupPackageNav() {
+        const packageNav = document.querySelector('.package-nav');
+        const categoryToggle = document.querySelector('.package-category-toggle');
+        if (!packageNav || !categoryToggle) return;
 
-    // Configurar los botones de categoría
-    const categoryInputs = categoryToggle.querySelectorAll('input[type="radio"]');
-    categoryInputs.forEach(input => {
-        input.addEventListener('change', () => {
-            const category = input.value;
-            filterPackages(category);
+        // Configurar los botones de categoría
+        const categoryInputs = categoryToggle.querySelectorAll('input[type="radio"]');
+        categoryInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                const category = input.value;
+                filterPackages(category);
+            });
         });
-    });
 
-    // Configurar el botón "Planea tu idea"
-    const planeaButton = categoryToggle.querySelector('.planea-tu-experiencia-btn');
-    if (planeaButton) {
-        planeaButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.location.href = 'tuplan.html';
-        });
-    }
-
-    // Generar botones de navegación de paquetes
-    packageNav.innerHTML = '';
-    const allPackages = new Set();
-
-    if (services.paquetes) {
-        services.paquetes.forEach(pkg => {
-            allPackages.add(pkg.type || pkg.title);
-        });
-    }
-
-    const allButton = document.createElement('button');
-    allButton.classList.add('package-btn', 'active');
-    allButton.dataset.filter = 'all';
-    allButton.innerHTML = `
-        <img src="${BASE_URL}todos.webp" alt="Todos">
-        <span class="visible-text">Todos</span>
-        <span class="hidden-text visually-hidden">all</span>
-    `;
-    packageNav.appendChild(allButton);
-
-    allPackages.forEach(packageType => {
-        const button = document.createElement('button');
-        button.classList.add('package-btn');
-        button.dataset.filter = packageType.toLowerCase().replace(/\s+/g, '-');
-        const iconUrl = `${BASE_URL}${packageType.toLowerCase().replace(/\s+/g, '-')}-icon.webp`;
-        const alternativeText = getAlternativeText(packageType);
-        button.innerHTML = `
-            <img src="${iconUrl}" alt="${packageType}">
-            <span class="visible-text">${alternativeText}</span>
-            <span class="hidden-text visually-hidden">${packageType}</span>
-        `;
-        packageNav.appendChild(button);
-    });
-
-    setupFilterButtons('.package-nav', '#package-list', '.package-item');
-}
-
-function filterPackages(category) {
-    const packages = document.querySelectorAll('#package-list .package-item');
-    packages.forEach(pkg => {
-        if (category === 'all' || pkg.classList.contains(category)) {
-            pkg.style.display = 'block';
-        } else {
-            pkg.style.display = 'none';
+        // Configurar el botón "Planea tu idea"
+        const planeaButton = categoryToggle.querySelector('.planea-tu-experiencia-btn');
+        if (planeaButton) {
+            planeaButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'tuplan.html';
+            });
         }
-    });
-}
 
+        // Generar botones de navegación de paquetes
+        packageNav.innerHTML = '';
+        const allPackages = new Set();
 
+        if (services.paquetes) {
+            services.paquetes.forEach(pkg => {
+                allPackages.add(pkg.type || pkg.title);
+            });
+        }
+
+        const allButton = document.createElement('button');
+        allButton.classList.add('package-btn', 'active');
+        allButton.dataset.filter = 'all';
+        allButton.innerHTML = `
+            <img src="${BASE_URL}todos.webp" alt="Todos">
+            <span class="visible-text">Todos</span>
+            <span class="hidden-text visually-hidden">all</span>
+        `;
+        packageNav.appendChild(allButton);
+
+        allPackages.forEach(packageType => {
+            const button = document.createElement('button');
+            button.classList.add('package-btn');
+            button.dataset.filter = packageType.toLowerCase().replace(/\s+/g, '-');
+            const iconUrl = `${BASE_URL}${packageType.toLowerCase().replace(/\s+/g, '-')}-icon.webp`;
+            const alternativeText = getAlternativeText(packageType);
+            button.innerHTML = `
+                <img src="${iconUrl}" alt="${packageType}">
+                <span class="visible-text">${alternativeText}</span>
+                <span class="hidden-text visually-hidden">${packageType}</span>
+            `;
+            packageNav.appendChild(button);
+        });
+
+        setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    }
+
+    function filterPackages(category) {
+        const packages = document.querySelectorAll('#package-list .package-item');
+        packages.forEach(pkg => {
+            if (category === 'all' || pkg.classList.contains(category)) {
+                pkg.style.display = 'block';
+            } else {
+                pkg.style.display = 'none';
+            }
+        });
+    }
 
     function setupPopup() {
         const popup = getElement('popup');
@@ -648,10 +646,9 @@ function filterPackages(category) {
 
         const galleryImages = [
             { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
-            { src: 'quesoshm.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'QUESOSHM.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
             { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
             { src: 'paq41.webp', title: 'Paquete Experiencia Total', description: 'Disfruta de una experiencia completa de relajación y bienestar' },
-            { src: 'lujo2.webp', title: 'Masaje de Lujo', description: 'Sumérgete en el máximo lujo con nuestro masaje premium' },
             { src: 'lujo.webp', title: 'Ambiente de Lujo', description: 'Relájate en nuestro ambiente de lujo diseñado para tu máximo confort' },
             { src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
             { src: 'paq2.webp', title: 'Paquete Pareja', description: 'Comparte un momento especial con tu pareja en nuestro spa' },
@@ -729,12 +726,12 @@ function filterPackages(category) {
     function navigateGallery(newIndex) {
         const galleryImages = [
             { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
-            { src: 'quesoshm.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'QUESOSHM.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
             { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
             { src: 'paq41.webp', title: 'Paquete Experiencia Total', description: 'Disfruta de una experiencia completa de relajación y bienestar' },
             { src: 'lujo2.webp', title: 'Masaje de Lujo', description: 'Sumérgete en el máximo lujo con nuestro masaje premium' },
             { src: 'lujo.webp', title: 'Ambiente de Lujo', description: 'Relájate en nuestro ambiente de lujo diseñado para tu máximo confort' },
-{ src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
+            { src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
             { src: 'paq2.webp', title: 'Paquete Pareja', description: 'Comparte un momento especial con tu pareja en nuestro spa' },
             { src: 'semillas.webp', title: 'Masaje con Semillas', description: 'Prueba nuestro innovador masaje con semillas calientes' }
         ];
