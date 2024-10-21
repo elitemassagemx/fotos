@@ -1,133 +1,119 @@
+/* Estilos base */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 5px;
-  position: relative;
-  text-size-adjust: 100%;
+  font-family: Arial, sans-serif;
 }
 
+/* Estilos de la galería */
 #gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Más flexible para diferentes tamaños de pantalla */
-  grid-gap: 1em;
-  padding: 1em;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-auto-rows: 150px;
+  grid-auto-flow: dense;
+  gap: 5px;
+  padding: 5px;
 }
 
-#gallery > div {
-  overflow: hidden;
+.gallery-item {
   position: relative;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
-  border-radius: 8px; /* Añade bordes redondeados para un aspecto más suave */
-  transition: transform 0.3s ease; /* Añade una transición suave al hacer hover */
+  overflow: hidden;
 }
 
-#gallery > div:hover {
-  transform: scale(1.03); /* Efecto de zoom suave al hacer hover */
-}
-
-#gallery > div > img {
+.gallery-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: filter 0.3s ease; /* Transición más rápida para el efecto de blur */
+  transition: transform 0.3s ease;
 }
 
-#gallery > div > a {
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-  background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente en lugar de mezcla */
-  color: #fff;
-  font: bold 1.5em "Helvetica", sans-serif; /* Tamaño de fuente más pequeño y fallback font */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); /* Sombra de texto más sutil */
-  transition: opacity 0.3s ease;
+.gallery-item:hover img {
+  transform: scale(1.05);
 }
 
-#gallery > div:hover img {
-  filter: blur(3px);
+/* Estilos para dispositivos móviles */
+@media (max-width: 767px) {
+  body {
+    margin: 0;
+  }
+
+  #gallery {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 200px;
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .gallery-item:nth-child(3n+1) {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
 }
 
-#gallery > div:hover a {
+/* Estilos para tablets y desktop */
+@media (min-width: 768px) {
+  #gallery {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-auto-rows: 200px;
+  }
+
+  .gallery-item:nth-child(4n+1) {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+}
+
+/* Lightbox styles (mantenidos del código original) */
+[id^="lightbox-"]:target {
   opacity: 1;
+  pointer-events: auto;
 }
 
-/* Lightbox styles */
+[id^="lightbox-"]:target img {
+  filter: blur(0);
+}
+
 [id^="lightbox-"] {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 450ms ease-in-out;
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
-}
-
-[id^="lightbox-"]:target {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 #lightbox .content {
   max-width: 90%;
-  max-height: 90vh;
+  max-height: 90%;
   position: relative;
-  color: #fff;
 }
 
 #lightbox img {
-  max-height: 80vh;
+  max-height: 90vh;
   max-width: 100%;
   object-fit: contain;
-  margin: 0 auto;
-  display: block;
-}
-
-#lightbox .title {
-  display: block;
-  margin: 0;
-  padding: 1em;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  font-size: 1.2em;
-  opacity: 1; /* Siempre visible */
-  transform: translateY(0);
 }
 
 #lightbox a.close {
   position: absolute;
-  right: 20px;
-  top: 20px;
-  width: 44px; /* Tamaño mínimo recomendado para elementos táctiles */
-  height: 44px;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 10px;
+  right: 10px;
+  color: white;
   text-decoration: none;
-  color: #fff;
-  font-size: 1.5em;
-  opacity: 1; /* Siempre visible */
+  font-size: 24px;
 }
 
-/* Accessibility improvements */
+/* Accesibilidad */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -138,53 +124,4 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* Responsive adjustments */
-@media (min-width: 768px) {
-  #gallery {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  #gallery {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 767px) {
-  #gallery > div > a {
-    font-size: 1.2em;
-    padding: 0.5rem;
-  }
-}
-
-/* Añade soporte para navegación por teclado */
-#gallery > div > a:focus,
-#lightbox a.close:focus,
-#lightbox .nav-button:focus {
-  outline: 3px solid #4CAF50;
-  outline-offset: 2px;
-}
-
-/* Estilos para botones de navegación en el lightbox */
-#lightbox .nav-button {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  color: #fff;
-  border: none;
-  padding: 15px;
-  cursor: pointer;
-  font-size: 24px;
-}
-
-#lightbox .prev-button {
-  left: 20px;
-}
-
-#lightbox .next-button {
-  right: 20px;
 }
