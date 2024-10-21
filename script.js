@@ -43,15 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return element;
     }
     
-    function loadCarouselContent() {
-        fetch('carrusel.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('carrusel-container').innerHTML = data;
-                initCarousel();
-            })
-            .catch(error => console.error('Error loading carousel:', error));
-    }
+
+function loadCarouselContent() {
+    fetch('carrusel.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('carrusel-container').innerHTML = data;
+            // The initCarousel function will be called from carrusel.js
+        })
+        .catch(error => console.error('Error loading carousel:', error));
+}
+
 
     function initCarousel() {
         console.log('Initializing carousel');
