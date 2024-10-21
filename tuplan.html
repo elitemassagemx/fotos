@@ -13,6 +13,12 @@
         <h1>Crea Tu Experiencia Perfecta</h1>
         <p>En Elite Massage, creemos que cada momento de relajación debe ser tan único como tú. Personaliza tu experiencia ideal y déjanos crear un oasis de tranquilidad a tu medida.</p>
         
+        <div class="services-tabs">
+            <button class="services-tab active">Masajes</button>
+            <button class="services-tab">Experiencias</button>
+            <button class="services-tab">Paquetes</button>
+        </div>
+        
         <div class="form-container">
             <div class="progress-bar">
                 <div class="progress" id="progress"></div>
@@ -20,21 +26,26 @@
             
             <form id="plan-form">
                 <div class="form-step active" data-step="1">
-                    <h3><i class="fas fa-spa"></i> Tipo de Evento</h3>
+                    <h3><i class="fas fa-spa icon"></i> Tipo de Evento</h3>
                     <div class="option-group">
-                        <div class="option-item" data-value="despedida-soltera">
+                        <div class="option-item" data-value="despedida-soltera" data-tooltip="Celebra tu último día de soltera con un masaje relajante">
+                            <i class="fas fa-glass-cheers icon"></i>
                             <span>Despedida de soltera</span>
                         </div>
-                        <div class="option-item" data-value="masaje-pareja">
+                        <div class="option-item" data-value="masaje-pareja" data-tooltip="Disfruta de un momento íntimo con tu pareja">
+                            <i class="fas fa-heart icon"></i>
                             <span>Masaje en pareja</span>
                         </div>
-                        <div class="option-item" data-value="masaje-familiar">
+                        <div class="option-item" data-value="masaje-familiar" data-tooltip="Relájate junto a tus seres queridos">
+                            <i class="fas fa-users icon"></i>
                             <span>Masaje familiar</span>
                         </div>
-                        <div class="option-item" data-value="masaje-grupo-trabajo">
+                        <div class="option-item" data-value="masaje-grupo-trabajo" data-tooltip="Mejora el ambiente laboral con un masaje grupal">
+                            <i class="fas fa-briefcase icon"></i>
                             <span>Masaje para grupos de trabajo</span>
                         </div>
-                        <div class="option-item" data-value="otro">
+                        <div class="option-item" data-value="otro" data-tooltip="¿Tienes algo especial en mente? ¡Cuéntanos!">
+                            <i class="fas fa-plus icon"></i>
                             <span>Otro</span>
                         </div>
                     </div>
@@ -44,54 +55,54 @@
                 </div>
 
                 <div class="form-step" data-step="2">
-                    <h3><i class="fas fa-users"></i> Número de personas</h3>
+                    <h3><i class="fas fa-users icon"></i> Número de personas</h3>
                     <div class="option-group">
-                        <div class="option-item" data-value="2">
+                        <div class="option-item" data-value="2" data-tooltip="Perfecto para parejas">
                             <span>2 personas</span>
                         </div>
-                        <div class="option-item" data-value="3-5">
+                        <div class="option-item" data-value="3-5" data-tooltip="Ideal para pequeños grupos">
                             <span>3-5 personas</span>
                         </div>
-                        <div class="option-item" data-value="6-10">
+                        <div class="option-item" data-value="6-10" data-tooltip="Excelente para grupos medianos">
                             <span>6-10 personas</span>
                         </div>
-                        <div class="option-item" data-value="10+">
+                        <div class="option-item" data-value="10+" data-tooltip="Perfecto para grandes eventos">
                             <span>Más de 10 personas</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-step" data-step="3">
-                    <h3><i class="far fa-clock"></i> Duración del evento</h3>
+                    <h3><i class="far fa-clock icon"></i> Duración del evento</h3>
                     <div class="option-group">
-                        <div class="option-item" data-value="60">
+                        <div class="option-item" data-value="60" data-tooltip="Una hora de pura relajación">
                             <span>1 hora</span>
                         </div>
-                        <div class="option-item" data-value="90">
+                        <div class="option-item" data-value="90" data-tooltip="Tiempo suficiente para un masaje completo">
                             <span>1.5 horas</span>
                         </div>
-                        <div class="option-item" data-value="120+">
+                        <div class="option-item" data-value="120+" data-tooltip="Para una experiencia de spa completa">
                             <span>2 horas o más</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-step" data-step="4">
-                    <h3><i class="fas fa-hands"></i> Enfoque del masaje</h3>
+                    <h3><i class="fas fa-hands icon"></i> Enfoque del masaje</h3>
                     <div class="option-group">
-                        <div class="option-item" data-value="relajacion">
+                        <div class="option-item" data-value="relajacion" data-tooltip="Libera el estrés y relájate profundamente">
                             <span>Relajación</span>
                         </div>
-                        <div class="option-item" data-value="energizante">
+                        <div class="option-item" data-value="energizante" data-tooltip="Revitaliza tu cuerpo y mente">
                             <span>Energizante</span>
                         </div>
-                        <div class="option-item" data-value="anti-estres">
+                        <div class="option-item" data-value="anti-estres" data-tooltip="Combate el estrés y la tensión">
                             <span>Anti-estrés</span>
                         </div>
-                        <div class="option-item" data-value="descontracturante">
+                        <div class="option-item" data-value="descontracturante" data-tooltip="Alivia dolores musculares y tensiones">
                             <span>Descontracturante</span>
                         </div>
-                        <div class="option-item" data-value="otro">
+                        <div class="option-item" data-value="otro" data-tooltip="¿Tienes alguna necesidad específica?">
                             <span>Otro</span>
                         </div>
                     </div>
@@ -101,34 +112,34 @@
                 </div>
 
                 <div class="form-step" data-step="5">
-                    <h3><i class="fas fa-gift"></i> Obsequios</h3>
+                    <h3><i class="fas fa-gift icon"></i> Obsequios</h3>
                     <div class="option-group">
-                        <div class="option-item" data-value="peluches">
+                        <div class="option-item" data-value="peluches" data-tooltip="Un recuerdo suave y adorable">
                             <span>Peluches personalizados</span>
                         </div>
-                        <div class="option-item" data-value="fotos">
+                        <div class="option-item" data-value="fotos" data-tooltip="Captura los momentos especiales">
                             <span>Sesión de fotos profesional</span>
                         </div>
-                        <div class="option-item" data-value="pizza">
+                        <div class="option-item" data-value="pizza" data-tooltip="Deliciosa pizza para después del masaje">
                             <span>Pizza gourmet</span>
                         </div>
-                        <div class="option-item" data-value="postres">
+                        <div class="option-item" data-value="postres" data-tooltip="Dulces treats para terminar la experiencia">
                             <span>Postres personalizados</span>
                         </div>
-                        <div class="option-item" data-value="bebidas">
+                        <div class="option-item" data-value="bebidas" data-tooltip="Refrescantes bebidas premium">
                             <span>Bebidas premium</span>
                         </div>
-                        <div class="option-item" data-value="kits-spa">
+                        <div class="option-item" data-value="kits-spa" data-tooltip="Llévate la experiencia a casa">
                             <span>Kits de spa</span>
                         </div>
-                        <div class="option-item" data-value="flores">
+                        <div class="option-item" data-value="flores" data-tooltip="Un toque floral para tu experiencia">
                             <span>Flores o decoración especial</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-step" data-step="6">
-                    <h3><i class="fas fa-magic"></i> Personalización adicional</h3>
+                    <h3><i class="fas fa-magic icon"></i> Personalización adicional</h3>
                     <div class="option-group">
                         <div class="option-item toggle-container" data-value="decoracion-tematica">
                             <span>¿Te gustaría una decoración temática?</span>
@@ -165,27 +176,27 @@
                 </div>
 
                 <div class="form-step" data-step="7">
-                    <h3><i class="fas fa-cloud-sun"></i> Preferencias de ambiente</h3>
+                    <h3><i class="fas fa-cloud-sun icon"></i> Preferencias de ambiente</h3>
                     <div class="option-group">
-                        <div class="option-item" data-value="interior">
+                        <div class="option-item" data-value="interior" data-tooltip="Ambiente controlado y privado">
                             <span>Interior</span>
                         </div>
-                        <div class="option-item" data-value="exterior">
+                        <div class="option-item" data-value="exterior" data-tooltip="Disfruta de la naturaleza">
                             <span>Exterior</span>
                         </div>
                     </div>
                     <div class="option-group">
-                        <div class="option-item" data-value="tranquilo">
+                        <div class="option-item" data-value="tranquilo" data-tooltip="Perfecto para una relajación profunda">
                             <span>Ambiente tranquilo</span>
                         </div>
-                        <div class="option-item" data-value="fiesta-relajada">
+                        <div class="option-item" data-value="fiesta-relajada" data-tooltip="Diversión y relajación en equilibrio">
                             <span>Fiesta relajada</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-step" data-step="8">
-                    <h3><i class="fas fa-lightbulb"></i> Recomendaciones y Promociones</h3>
+                    <h3><i class="fas fa-lightbulb icon"></i> Recomendaciones y Promociones</h3>
                     <div class="option-group">
                         <div class="option-item toggle-container" data-value="recomendaciones">
                             <span>¿Te gustaría recibir recomendaciones para personalizar tu experiencia?</span>
@@ -207,12 +218,12 @@
                 </div>
 
                 <div class="form-step" data-step="9">
-                    <h3><i class="fas fa-comment-alt"></i> Comentarios adicionales</h3>
+                    <h3><i class="fas fa-comment-alt icon"></i> Comentarios adicionales</h3>
                     <textarea name="comentarios" rows="4" placeholder="Escribe aquí cualquier detalle o solicitud especial"></textarea>
                 </div>
 
                 <div class="form-step" data-step="10">
-                    <h3><i class="fas fa-address-card"></i> Información de contacto</h3>
+                    <h3><i class="fas fa-address-card icon"></i> Información de contacto</h3>
                     <div class="contact-form">
                         <input type="text" name="nombre" placeholder="Nombre" required>
                         <input type="tel" name="telefono" placeholder="Teléfono" required>
@@ -223,9 +234,11 @@
                         <h4>Medio de contacto preferido:</h4>
                         <div class="option-group">
                             <div class="option-item" data-value="llamada">
+                                <i class="fas fa-phone icon"></i>
                                 <span>Te marcamos</span>
                             </div>
                             <div class="option-item" data-value="whatsapp">
+                                <i class="fab fa-whatsapp icon"></i>
                                 <span>Te mandamos mensaje por WhatsApp</span>
                             </div>
                         </div>
