@@ -1,9 +1,13 @@
-// Reemplaza todo el contenido de tu archivo carrusel.js con esto
 document.addEventListener('DOMContentLoaded', function() {
-    const mainImage = document.getElementById('mainImage');
-    const mainImageTitle = document.getElementById('mainImageTitle');
-    const mainImageDescription = document.getElementById('mainImageDescription');
-    const navItems = document.querySelectorAll('.image-nav-item');
+    initPaqCarr();
+});
+
+function initPaqCarr() {
+    const mainImage = document.getElementById('paqcarrMainImage');
+    const mainImageTitle = document.getElementById('paqcarrMainImageTitle');
+    const mainImageDescription = document.getElementById('paqcarrMainImageDescription');
+    const navItems = document.querySelectorAll('#paqcarr-container .image-nav-item');
+
     navItems.forEach(item => {
         item.addEventListener('click', function() {
             const imageSrc = this.getAttribute('data-image');
@@ -19,8 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
         });
     });
+
     // Inicializar el primer item como activo
     if (navItems.length > 0) {
         navItems[0].classList.add('active');
     }
-});
+}
