@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateProgressBar() {
         const progress = ((currentStep + 1) / steps.length) * 100;
-        formProgressBar.style.width = `${progress}%`;
-        headerProgressBar.style.width = `${progress}%`;
+        if (formProgressBar) formProgressBar.style.width = `${progress}%`;
+        if (headerProgressBar) headerProgressBar.style.width = `${progress}%`;
     }
 
     function validateStep(step) {
@@ -58,65 +58,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    nextBtn.addEventListener('click', () => {
-        if (validateStep(steps[currentStep])) {
-            currentStep++;
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            if (validateStep(steps[currentStep])) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            currentStep--;
             showStep(currentStep);
-        }
-    });
-
-    prevBtn.addEventListener('click', () => {
-        currentStep--;
-        showStep(currentStep);
-    });
-
-submitBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (validateStep(steps[currentStep])) {
-        showFormPreview();
+        });
     }
-});
 
-function showFormPreview() {
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    
-    let previewContent = `
-        <h3>Resumen de tu Experiencia Personalizada</h3>
-        <ul>
-    `;
-    
-    for (const [key, value] of Object.entries(data)) {
-        if (value) {
-            let label = form.querySelector(`label[for="${key}"]`)?.textContent || key;
-            previewContent += `<li><strong>${label}:</strong> ${value}</li>`;
-        }
+    if (submitBtn) {
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (validateStep(steps[currentStep])) {
+                showFormPreview();
+            }
+        });
     }
-    
-    previewContent += `
-        </ul>
-        <button id="edit-form" class="nav-btn">Editar</button>
-        <button id="confirm-form" class="submit-btn">Confirmar y Enviar</button>
-    `;
-    
-    const previewModal = document.createElement('div');
-    previewModal.className = 'preview-modal';
-    previewModal.innerHTML = previewContent;
-    
-    document.body.appendChild(previewModal);
-    
-    document.getElementById('edit-form').addEventListener('click', () => {
-        previewModal.remove();
-    });
-    
-    document.getElementById('confirm-form').addEventListener('click', () => {
-        sendWhatsAppMessage();
-        showThankYouMessage();
-        previewModal.remove();
-    });
-}
 
-    saveProgressBtn.addEventListener('click', saveProgress);
+    function showThankYouMessage() {
+        const thankYouMessage = document.createElement('div');
+        thankYouMessage.className = 'thank-you-message';
+        thankYouMessage.innerHTML = `
+            <h3>¡Gracias por personalizar tu experiencia!</h3>
+            <p>Nuestro equipo de expertos en bienestar revisará tu solicitud y te contactará pronto para finalizar los detalles de tu experiencia en Elite Massage.</p>
+            <button class="close-message-btn">Cerrar</button>
+        `;
+        document.body.appendChild(thankYouMessage);
+
+        const closeBtn = thankYouMessage.querySelector('.close-message-btn');
+        closeBtn.addEventListener('click', () => {
+            thankYouMessage.remove();
+            form.reset();
+            currentStep = 0;
+            showStep(currentStep);
+        });
+    }
+
+    if (saveProgressBtn) {
+        saveProgressBtn.addEventListener('click', saveProgress);
+    }
 
     function saveProgress() {
         const formData = new FormData(form);
@@ -200,66 +188,55 @@ function showFormPreview() {
         });
         
         document.getElementById('confirm-form').addEventListener('click', () => {
-            const message = generateWhatsAppMessage(data);
-            sendWhatsAppMessage(message);
+            sendWhatsAppMessage();
             showThankYouMessage();
             previewModal.remove();
         });
     }
 
-    function generateWhatsAppMessage(formData) {
-        let message = "¡Hola! Me gustaría reservar una experiencia personalizada en Elite Massage:\n\n";
-        for (const [key, value] of Object.entries(formData)) {
+    function sendWhatsAppMessage() {
+        const formData = new FormData(form);
+        let message = "Hola! Me gustaría reservar una experiencia personalizada en Elite Massage:\n\n";
+
+        // Mapeo de nombres de campos a etiquetas legibles
+        const fieldLabels = {
+            'tipo-evento': 'Tipo de evento',
+            'numero-personas': 'Número de personas',
+            'duracion': 'Duración',
+            'enfoque-masaje': 'Enfoque del masaje',
+            'obsequios': 'Obsequios',
+            'decoracion-tematica': 'Decoración temática',
+            'musica': 'Música/DJ',
+            'catering': 'Catering',
+            'ambiente': 'Ambiente',
+            'nombre': 'Nombre',
+            'telefono': 'Teléfono',
+            'email': 'Email',
+            'fecha': 'Fecha preferida'
+        };
+
+        for (let [key, value] of formData.entries()) {
             if (value) {
-                let label = form.querySelector(`label[for="${key}"]`)?.textContent || key;
-                message += `${label}: ${value}\n`;
+                const label = fieldLabels[key] || key;
+                if (key === 'obsequios') {
+                    // Para checkboxes, podemos tener múltiples valores
+                    const obsequios = formData.getAll('obsequios');
+                    message += `${label}: ${obsequios.join(', ')}\n`;
+                } else if (key === 'decoracion-tematica' || key === 'musica' || key === 'catering') {
+                    // Para toggles, convertimos a Sí/No
+                    message += `${label}: ${value === 'on' ? 'Sí' : 'No'}\n`;
+                } else {
+                    message += `${label}: ${value}\n`;
+                }
             }
         }
-        return encodeURIComponent(message);
+
+        const phoneNumber = '5215640020305'; // Número de WhatsApp de Elite Massage
+        const encodedMessage = encodeURIComponent(message);
+        const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+        window.open(url, '_blank');
     }
 
-function sendWhatsAppMessage() {
-    const formData = new FormData(document.getElementById('plan-form'));
-    let message = "Hola! Me gustaría reservar una experiencia personalizada en Elite Massage:\n\n";
-
-    // Mapeo de nombres de campos a etiquetas legibles
-    const fieldLabels = {
-        'tipo-evento': 'Tipo de evento',
-        'numero-personas': 'Número de personas',
-        'duracion': 'Duración',
-        'enfoque-masaje': 'Enfoque del masaje',
-        'obsequios': 'Obsequios',
-        'decoracion-tematica': 'Decoración temática',
-        'musica': 'Música/DJ',
-        'catering': 'Catering',
-        'ambiente': 'Ambiente',
-        'nombre': 'Nombre',
-        'telefono': 'Teléfono',
-        'email': 'Email',
-        'fecha': 'Fecha preferida'
-    };
-
-    for (let [key, value] of formData.entries()) {
-        if (value) {
-            const label = fieldLabels[key] || key;
-            if (key === 'obsequios') {
-                // Para checkboxes, podemos tener múltiples valores
-                const obsequios = formData.getAll('obsequios');
-                message += `${label}: ${obsequios.join(', ')}\n`;
-            } else if (key === 'decoracion-tematica' || key === 'musica' || key === 'catering') {
-                // Para toggles, convertimos a Sí/No
-                message += `${label}: ${value === 'on' ? 'Sí' : 'No'}\n`;
-            } else {
-                message += `${label}: ${value}\n`;
-            }
-        }
-    }
-
-    const phoneNumber = '5215640020305'; // Número de WhatsApp de Elite Massage
-    const encodedMessage = encodeURIComponent(message);
-    const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-    window.open(url, '_blank');
-}
     // Inicializar
     showStep(currentStep);
 });
