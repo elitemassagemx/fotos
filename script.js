@@ -541,8 +541,6 @@ benefitItem.appendChild(img);
         return alternativeTexts[benefit] || benefit;
     }
 
-
-
 function setupPackageNav() {
     const packageNav = document.querySelector('.package-nav');
     const categoryToggle = document.querySelector('.package-category-toggle');
@@ -613,7 +611,7 @@ function filterPackages(category) {
         }
     });
 }
-    
+
 
 
     function setupPopup() {
