@@ -541,45 +541,80 @@ benefitItem.appendChild(img);
         return alternativeTexts[benefit] || benefit;
     }
 
-    function setupPackageNav() {
-        const packageNav = document.querySelector('.package-nav');
-        if (!packageNav) return;
 
-        packageNav.innerHTML = '';
-        const allPackages = new Set();
 
-        if (services.paquetes) {
-            services.paquetes.forEach(pkg => {
-                allPackages.add(pkg.type || pkg.title);
-            });
-        }
+function setupPackageNav() {
+    const packageNav = document.querySelector('.package-nav');
+    const categoryToggle = document.querySelector('.package-category-toggle');
+    if (!packageNav || !categoryToggle) return;
 
-        const allButton = document.createElement('button');
-        allButton.classList.add('package-btn', 'active');
-        allButton.dataset.filter = 'all';
-        allButton.innerHTML = `
-            <img src="${BASE_URL}todos.webp" alt="Todos">
-            <span class="visible-text">Todos</span>
-            <span class="hidden-text visually-hidden">all</span>
-        `;
-        packageNav.appendChild(allButton);
-
-        allPackages.forEach(packageType => {
-            const button = document.createElement('button');
-            button.classList.add('package-btn');
-            button.dataset.filter = packageType.toLowerCase().replace(/\s+/g, '-');
-            const iconUrl = `${BASE_URL}${packageType.toLowerCase().replace(/\s+/g, '-')}-icon.webp`;
-            const alternativeText = getAlternativeText(packageType);
-            button.innerHTML = `
-                <img src="${iconUrl}" alt="${packageType}">
-                <span class="visible-text">${alternativeText}</span>
-                <span class="hidden-text visually-hidden">${packageType}</span>
-            `;
-            packageNav.appendChild(button);
+    // Configurar los botones de categoría
+    const categoryInputs = categoryToggle.querySelectorAll('input[type="radio"]');
+    categoryInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            const category = input.value;
+            filterPackages(category);
         });
+    });
 
-        setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    // Configurar el botón "Planea tu idea"
+    const planeaButton = categoryToggle.querySelector('.planea-tu-experiencia-btn');
+    if (planeaButton) {
+        planeaButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'tuplan.html';
+        });
     }
+
+    // Generar botones de navegación de paquetes
+    packageNav.innerHTML = '';
+    const allPackages = new Set();
+
+    if (services.paquetes) {
+        services.paquetes.forEach(pkg => {
+            allPackages.add(pkg.type || pkg.title);
+        });
+    }
+
+    const allButton = document.createElement('button');
+    allButton.classList.add('package-btn', 'active');
+    allButton.dataset.filter = 'all';
+    allButton.innerHTML = `
+        <img src="${BASE_URL}todos.webp" alt="Todos">
+        <span class="visible-text">Todos</span>
+        <span class="hidden-text visually-hidden">all</span>
+    `;
+    packageNav.appendChild(allButton);
+
+    allPackages.forEach(packageType => {
+        const button = document.createElement('button');
+        button.classList.add('package-btn');
+        button.dataset.filter = packageType.toLowerCase().replace(/\s+/g, '-');
+        const iconUrl = `${BASE_URL}${packageType.toLowerCase().replace(/\s+/g, '-')}-icon.webp`;
+        const alternativeText = getAlternativeText(packageType);
+        button.innerHTML = `
+            <img src="${iconUrl}" alt="${packageType}">
+            <span class="visible-text">${alternativeText}</span>
+            <span class="hidden-text visually-hidden">${packageType}</span>
+        `;
+        packageNav.appendChild(button);
+    });
+
+    setupFilterButtons('.package-nav', '#package-list', '.package-item');
+}
+
+function filterPackages(category) {
+    const packages = document.querySelectorAll('#package-list .package-item');
+    packages.forEach(pkg => {
+        if (category === 'all' || pkg.classList.contains(category)) {
+            pkg.style.display = 'block';
+        } else {
+            pkg.style.display = 'none';
+        }
+    });
+}
+    
+
 
     function setupPopup() {
         const popup = getElement('popup');
