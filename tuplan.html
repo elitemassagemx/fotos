@@ -3,28 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Elite Massage: Tu oasis de tranquilidad. Descubre nuestros servicios de masajes y paquetes especiales para una experiencia de relajación única.">
-    <title>Elite Massage</title>
+    <meta name="description" content="Personaliza tu experiencia de masaje perfecta en Elite Massage. Crea un plan a tu medida y disfruta de un oasis de tranquilidad único.">
+    <title>Tu Plan Personalizado - Elite Massage</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Quattrocento:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="tuplan.css">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <!-- Favicon -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.webp">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.webp">
-    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.webp">
-    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.webp">
-    <link rel="apple-touch-icon" href="apple-touch-icon.webp">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     
     <!-- Web Manifest -->
     <link rel="manifest" href="site.webmanifest">
@@ -34,272 +23,268 @@
         <div class="container">
             <div class="header-top">
                 <div class="logo-container">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/logo.webp" alt="Elite Massage Logo" class="logo" onerror="this.onerror=null; this.src='https://elitemassagemx.github.io/Home/IMG/fallback-logo.webp';">
+                    <img src="https://elitemassagemx.github.io/Home/ICONOS/logo.png" alt="Elite Massage Logo" class="logo" onerror="this.onerror=null; this.src='https://elitemassagemx.github.io/Home/ICONOS/fallback-logo.png';">
                     <h1>Elite Massage</h1>
                 </div>
             </div>
         </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="headerProgressBar"></div>
+        </div>
     </header>
-    
-<body>
-    <div class="container">
-        <h1>Crea Tu Experiencia con Elite Massage</h1>
-        <p>En EM, creemos que cada momento de relajación debe ser tan único como tú. Personaliza tu experiencia ideal y déjanos crear un oasis de tranquilidad a tu medida.</p>
-        <div class="form-container">
-            <div class="progress-bar">
-                <div class="progress" id="progress"></div>
-            </div>
-            <form id="plan-form">
-                <div class="form-step active" data-step="1">
-                    <h3><i class="fas fa-spa icon"></i> Tipo de Evento</h3>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="radio" name="tipo-evento" value="despedida-soltera">
-                            <span><i class="fas fa-glass-cheers icon"></i> Despedida de soltera</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="tipo-evento" value="masaje-pareja">
-                            <span><i class="fas fa-heart icon"></i> Masaje en pareja</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="tipo-evento" value="masaje-familiar">
-                            <span><i class="fas fa-users icon"></i> Masaje familiar</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="tipo-evento" value="masaje-grupo-trabajo">
-                            <span><i class="fas fa-briefcase icon"></i> Masaje para grupos de trabajo</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="tipo-evento" value="otro">
-                            <span><i class="fas fa-plus icon"></i> Otro</span>
-                        </label>
-                    </div>
-                    <div id="otro-tipo-evento" class="hidden">
-                        <input type="text" name="otro-tipo-evento" placeholder="Describe tu tipo de evento">
-                    </div>
-                </div>
 
-                <div class="form-step" data-step="2">
-                    <h3><i class="fas fa-users icon"></i> Número de personas</h3>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="radio" name="numero-personas" value="2">
-                            <span>2 personas</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="numero-personas" value="3-5">
-                            <span>3-5 personas</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="numero-personas" value="6-10">
-                            <span>6-10 personas</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="numero-personas" value="10+">
-                            <span>Más de 10 personas</span>
-                        </label>
+    <main role="main">
+        <section id="tu-plan" class="section tu-plan">
+            <div class="container">
+                <h2>Crea Tu Experiencia Perfecta</h2>
+                <p class="intro">En Elite Massage, creemos que cada momento de relajación debe ser tan único como tú. Personaliza tu experiencia ideal y déjanos crear un oasis de tranquilidad a tu medida.</p>
+                
+                <form id="plan-form" class="plan-form">
+                    <div class="form-progress">
+                        <div class="progress-bar" id="formProgressBar"></div>
                     </div>
-                </div>
 
-                <div class="form-step" data-step="3">
-                    <h3><i class="far fa-clock icon"></i> Duración del evento</h3>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="radio" name="duracion" value="60">
-                            <span>1 hora</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="duracion" value="90">
-                            <span>1.5 horas</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="duracion" value="120+">
-                            <span>2 horas o más</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-step" data-step="4">
-                    <h3><i class="fas fa-hands icon"></i> Enfoque del masaje</h3>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="radio" name="enfoque-masaje" value="relajacion">
-                            <span>Relajación</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="enfoque-masaje" value="energizante">
-                            <span>Energizante</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="enfoque-masaje" value="anti-estres">
-                            <span>Anti-estrés</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="enfoque-masaje" value="descontracturante">
-                            <span>Descontracturante</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="enfoque-masaje" value="otro">
-                            <span>Otro</span>
-                        </label>
-                    </div>
-                    <div id="otro-enfoque-masaje" class="hidden">
-                        <input type="text" name="otro-enfoque-masaje" placeholder="Describe el enfoque deseado">
-                    </div>
-                </div>
-
-                <div class="form-step" data-step="5">
-                    <h3><i class="fas fa-gift icon"></i> Obsequios</h3>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="peluches">
-                            <span>Peluches personalizados</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="fotos">
-                            <span>Sesión de fotos profesional</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="pizza">
-                            <span>Pizza gourmet</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="postres">
-                            <span>Postres personalizados</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="bebidas">
-                            <span>Bebidas premium</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="kits-spa">
-                            <span>Kits de spa</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="checkbox" name="obsequios" value="flores">
-                            <span>Flores o decoración especial</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-step" data-step="6">
-                    <h3><i class="fas fa-magic icon"></i> Personalización adicional</h3>
-                    <div class="option-group">
-                        <div class="option-item toggle-container">
-                            <span>¿Te gustaría una decoración temática?</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="decoracion-tematica" name="decoracion-tematica">
-                                <label for="decoracion-tematica"></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="tema-decoracion" class="hidden">
-                        <input type="text" name="tema-decoracion" placeholder="Describe el tema deseado">
-                    </div>
-                    <div class="option-group">
-                        <div class="option-item toggle-container">
-                            <span>¿Te gustaría incluir música ambiental o DJ?</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="musica" name="musica">
-                                <label for="musica"></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="option-group">
-                        <div class="option-item toggle-container">
-                            <span>¿Deseas añadir un brindis o catering especial?</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="catering" name="catering">
-                                <label for="catering"></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="tipo-catering" class="hidden">
-                        <input type="text" name="tipo-catering" placeholder="Describe el tipo de catering deseado">
-                    </div>
-                </div>
-
-                <div class="form-step" data-step="7">
-                    <h3><i class="fas fa-cloud-sun icon"></i> Preferencias de ambiente</h3>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="radio" name="ambiente" value="interior">
-                            <span>Interior</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="ambiente" value="exterior">
-                            <span>Exterior</span>
-                        </label>
-                    </div>
-                    <div class="option-group">
-                        <label class="option-item">
-                            <input type="radio" name="ambiente-tipo" value="tranquilo">
-                            <span>Ambiente tranquilo</span>
-                        </label>
-                        <label class="option-item">
-                            <input type="radio" name="ambiente-tipo" value="fiesta-relajada">
-                            <span>Fiesta relajada</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-step" data-step="8">
-                    <h3><i class="fas fa-lightbulb icon"></i> Recomendaciones y Promociones</h3>
-                    <div class="option-group">
-                        <div class="option-item toggle-container">
-                            <span>¿Te gustaría recibir recomendaciones para personalizar tu experiencia?</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="recomendaciones" name="recomendaciones">
-                                <label for="recomendaciones"></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="option-group">
-                        <div class="option-item toggle-container">
-                            <span>¿Deseas recibir promociones especiales o descuentos para eventos futuros?</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="promociones" name="promociones">
-                                <label for="promociones"></label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-step" data-step="9">
-                    <h3><i class="fas fa-comment-alt icon"></i> Comentarios adicionales</h3>
-                    <textarea name="comentarios" rows="4" placeholder="Escribe aquí cualquier detalle o solicitud especial"></textarea>
-                </div>
-
-                <div class="form-step" data-step="10">
-                    <h3><i class="fas fa-address-card icon"></i> Información de contacto</h3>
-                    <div class="contact-form">
-                        <input type="text" name="nombre" placeholder="Nombre" required>
-                        <input type="tel" name="telefono" placeholder="Teléfono" required>
-                        <input type="email" name="email" placeholder="Correo electrónico" required>
-                        <input type="date" name="fecha" placeholder="Fecha preferida para la experiencia" required>
-                    </div>
-                    <div class="contact-preference">
-                        <h4>Medio de contacto preferido:</h4>
+                    <div class="form-step" data-step="1">
+                        <h3><i class="fas fa-spa"></i> Tipo de Evento</h3>
                         <div class="option-group">
                             <label class="option-item">
-                                <input type="radio" name="contacto-preferido" value="llamada">
-                                <span><i class="fas fa-phone icon"></i> Te marcamos</span>
+                                <input type="radio" name="tipo-evento" value="despedida-soltera">
+                                <span>Despedida de soltera</span>
                             </label>
                             <label class="option-item">
-                                <input type="radio" name="contacto-preferido" value="whatsapp">
-                                <span><i class="fab fa-whatsapp icon"></i> Te mandamos mensaje por WhatsApp</span>
+                                <input type="radio" name="tipo-evento" value="masaje-pareja">
+                                <span>Masaje en pareja</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="tipo-evento" value="masaje-familiar">
+                                <span>Masaje familiar</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="tipo-evento" value="masaje-grupo-trabajo">
+                                <span>Masaje para grupos de trabajo</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="tipo-evento" value="otro">
+                                <span>Otro</span>
+                            </label>
+                        </div>
+                        <div id="otro-tipo-evento" class="hidden">
+                            <input type="text" name="otro-tipo-evento" placeholder="Describe tu tipo de evento">
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="2">
+                        <h3><i class="fas fa-users"></i> Número de personas</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <input type="radio" name="num-personas" value="2">
+                                <span>2 personas</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="num-personas" value="3-5">
+                                <span>3-5 personas</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="num-personas" value="6-10">
+                                <span>6-10 personas</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="num-personas" value="10+">
+                                <span>Más de 10 personas</span>
                             </label>
                         </div>
                     </div>
-                </div>
 
-                <div class="form-navigation">
-                    <button type="button" id="submit-btn" class="submit-btn">Enviar Plan</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                    <div class="form-step" data-step="3">
+                        <h3><i class="far fa-clock"></i> Duración del evento</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <input type="radio" name="duracion" value="60">
+                                <span>1 hora</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="duracion" value="90">
+                                <span>1.5 horas</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="duracion" value="120+">
+                                <span>2 horas o más</span>
+                            </label>
+                        </div>
+                    </div>
 
-    <script src="tuplan.js"></script>
-</body>
-</html>
+                    <div class="form-step" data-step="4">
+                        <h3><i class="fas fa-hands"></i> Enfoque del masaje</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <input type="radio" name="enfoque-masaje" value="relajacion">
+                                <span>Relajación</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="enfoque-masaje" value="energizante">
+                                <span>Energizante</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="enfoque-masaje" value="anti-estres">
+                                <span>Anti-estrés</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="enfoque-masaje" value="descontracturante">
+                                <span>Descontracturante</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="enfoque-masaje" value="otro">
+                                <span>Otro</span>
+                            </label>
+                        </div>
+                        <div id="otro-enfoque-masaje" class="hidden">
+                            <input type="text" name="otro-enfoque-masaje" placeholder="Describe el enfoque deseado">
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="5">
+                        <h3><i class="fas fa-gift"></i> Obsequios</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="peluches">
+                                <span>Peluches personalizados</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="fotos">
+                                <span>Sesión de fotos profesional</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="pizza">
+                                <span>Pizza gourmet</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="postres">
+                                <span>Postres personalizados</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="bebidas">
+                                <span>Bebidas premium</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="kits-spa">
+                                <span>Kits de spa</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="checkbox" name="obsequios" value="flores">
+                                <span>Flores o decoración especial</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="6">
+                        <h3><i class="fas fa-magic"></i> Personalización adicional</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <span>¿Te gustaría una decoración temática?</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" name="decoracion-tematica" id="decoracion-tematica">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="tema-decoracion" class="hidden">
+                            <input type="text" name="tema-decoracion" placeholder="Describe el tema deseado">
+                        </div>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <span>¿Te gustaría incluir música ambiental o DJ?</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" name="musica" id="musica">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <span>¿Deseas añadir un brindis o catering especial?</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" name="catering" id="catering">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="tipo-catering" class="hidden">
+                            <input type="text" name="tipo-catering" placeholder="Describe el tipo de catering deseado">
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="7">
+                        <h3><i class="fas fa-cloud-sun"></i> Preferencias de ambiente</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <input type="radio" name="ambiente" value="interior">
+                                <span>Interior</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="ambiente" value="exterior">
+                                <span>Exterior</span>
+                            </label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <input type="radio" name="tipo-ambiente" value="tranquilo">
+                                <span>Ambiente tranquilo</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="tipo-ambiente" value="fiesta-relajada">
+                                <span>Fiesta relajada</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="8">
+                        <h3><i class="fas fa-lightbulb"></i> Recomendaciones y Promociones</h3>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <span>¿Te gustaría recibir recomendaciones para personalizar tu experiencia?</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" name="recomendaciones" id="recomendaciones">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="option-group">
+                            <label class="option-item">
+                                <span>¿Deseas recibir promociones especiales o descuentos para eventos futuros?</span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" name="promociones" id="promociones">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="9">
+                        <h3><i class="fas fa-comment-alt"></i> Comentarios adicionales</h3>
+                        <textarea name="comentarios" rows="4" placeholder="Escribe aquí cualquier detalle o solicitud especial"></textarea>
+                    </div>
+
+                    <div class="form-step" data-step="10">
+                        <h3><i class="fas fa-address-card"></i> Información de contacto</h3>
+                        <div class="contact-form">
+                            <input type="text" name="nombre" placeholder="Nombre" required>
+                            <input type="tel" name="telefono" placeholder="Teléfono" required>
+                            <input type="email" name="email" placeholder="Correo electrónico" required>
+                            <input type="date" name="fecha" placeholder="Fecha preferida para la experiencia" required>
+                        </div>
+                        <div class="contact-preference">
+                            <h4>Medio de contacto preferido:</h4>
+                            <label class="option-item">
+                                <input type="radio" name="contacto" value="llamada">
+                                <span>Te marcamos</span>
+                            </label>
+                            <label class="option-item">
+                                <input type="radio" name="contacto" value="whatsapp">
+                                <span>Te mandamos mensaje por WhatsApp</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" id="prev-btn" class="nav-btn">Anterior</button>
+                        <button type="button" id="next-btn" class="nav-btn">
