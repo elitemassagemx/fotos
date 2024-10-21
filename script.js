@@ -370,13 +370,6 @@ function setupServiceCategories() {
     categoryInputs.forEach(input => {
         input.addEventListener('change', () => {
             const category = input.value;
-            const sectionId = input.closest('// ... (código anterior sin cambios)
-
-function setupServiceCategories() {
-    const categoryInputs = document.querySelectorAll('.service-category-toggle input[type="radio"]');
-    categoryInputs.forEach(input => {
-        input.addEventListener('change', () => {
-            const category = input.value;
             renderServices(category);
             setupBenefitsNav(category);
             setupPackageNav();
