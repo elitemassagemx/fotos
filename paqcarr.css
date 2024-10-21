@@ -1,5 +1,5 @@
 /* Estilos para el carrusel */
-#paqcarrusel-container {
+#paqpaqcarr-container {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
@@ -7,7 +7,7 @@
     box-sizing: border-box;
 }
 
-#carrusel-container .main-image-container {
+#paqcarr-container .main-image-container {
     width: 100%;
     height: 400px;
     overflow: hidden;
@@ -17,18 +17,18 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-#carrusel-container .main-image {
+#paqcarr-container .main-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
 
-#carrusel-container .main-image-container:hover .main-image {
+#paqcarr-container .main-image-container:hover .main-image {
     transform: scale(1.05);
 }
 
-#carrusel-container .image-info {
+#paqcarr-container .image-info {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -39,46 +39,46 @@
     font-family: 'Quattrocento', serif;
 }
 
-#carrusel-container .image-info h3 {
+#paqcarr-container .image-info h3 {
     font-family: 'Tenor Sans', sans-serif;
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
 }
 
-#carrusel-container .image-info p {
+#paqcarr-container .image-info p {
     font-size: 1rem;
     line-height: 1.4;
 }
 
-#carrusel-container .image-nav-container {
+#paqcarr-container .image-nav-container {
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
 
-#carrusel-container .image-nav-container::-webkit-scrollbar {
+#paqcarr-container .image-nav-container::-webkit-scrollbar {
     display: none;
 }
 
-#carrusel-container .image-nav {
+#paqcarr-container .image-nav {
     display: flex;
     gap: 15px;
     padding: 10px 0;
 }
 
-#carrusel-container .image-nav-item {
+#paqcarr-container .image-nav-item {
     flex: 0 0 auto;
     width: 120px;
     cursor: pointer;
     transition: transform 0.3s ease;
 }
 
-#carrusel-container .image-nav-item:hover {
+#paqcarr-container .image-nav-item:hover {
     transform: translateY(-5px);
 }
 
-#carrusel-container .image-nav-item img {
+#paqcarr-container .image-nav-item img {
     width: 100%;
     height: 80px;
     object-fit: cover;
@@ -86,7 +86,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-#carrusel-container .image-nav-caption {
+#paqcarr-container .image-nav-caption {
     font-size: 0.8rem;
     text-align: center;
     margin-top: 5px;
@@ -94,68 +94,68 @@
     color: var(--text-color);
 }
 
-#carrusel-container .image-nav-item.active {
+#paqcarr-container .image-nav-item.active {
     border: 2px solid var(--primary-color);
     border-radius: 8px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    #carrusel-container {
+    #paqcarr-container {
         padding: 10px;
     }
 
-    #carrusel-container .main-image-container {
+    #paqcarr-container .main-image-container {
         height: 300px;
     }
 
-    #carrusel-container .image-info h3 {
+    #paqcarr-container .image-info h3 {
         font-size: 1.2rem;
     }
 
-    #carrusel-container .image-info p {
+    #paqcarr-container .image-info p {
         font-size: 0.9rem;
     }
 
-    #carrusel-container .image-nav-item {
+    #paqcarr-container .image-nav-item {
         width: 100px;
     }
 
-    #carrusel-container .image-nav-item img {
+    #paqcarr-container .image-nav-item img {
         height: 60px;
     }
 }
 
 @media (max-width: 576px) {
-    #carrusel-container .main-image-container {
+    #paqcarr-container .main-image-container {
         height: 250px;
     }
 
-    #carrusel-container .image-info h3 {
+    #paqcarr-container .image-info h3 {
         font-size: 1rem;
     }
 
-    #carrusel-container .image-info p {
+    #paqcarr-container .image-info p {
         font-size: 0.8rem;
     }
 
-    #carrusel-container .image-nav-item {
+    #paqcarr-container .image-nav-item {
         width: 80px;
     }
 
-    #carrusel-container .image-nav-item img {
+    #paqcarr-container .image-nav-item img {
         height: 50px;
     }
 
-    #carrusel-container .image-nav-caption {
+    #paqcarr-container .image-nav-caption {
         font-size: 0.7rem;
     }
 }
 
 /* Accessibility and reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    #carrusel-container .main-image,
-    #carrusel-container .image-nav-item {
+    #paqcarr-container .main-image,
+    #paqcarr-container .image-nav-item {
         transition: none;
     }
 }
