@@ -70,31 +70,51 @@ document.addEventListener('DOMContentLoaded', function() {
         showStep(currentStep);
     });
 
-    submitBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (validateStep(steps[currentStep])) {
-            showFormPreview();
-        }
-    });
-
-    function showThankYouMessage() {
-        const thankYouMessage = document.createElement('div');
-        thankYouMessage.className = 'thank-you-message';
-        thankYouMessage.innerHTML = `
-            <h3>¡Gracias por personalizar tu experiencia!</h3>
-            <p>Nuestro equipo de expertos en bienestar revisará tu solicitud y te contactará pronto para finalizar los detalles de tu experiencia en Elite Massage.</p>
-            <button class="close-message-btn">Cerrar</button>
-        `;
-        document.body.appendChild(thankYouMessage);
-
-        const closeBtn = thankYouMessage.querySelector('.close-message-btn');
-        closeBtn.addEventListener('click', () => {
-            thankYouMessage.remove();
-            form.reset();
-            currentStep = 0;
-            showStep(currentStep);
-        });
+submitBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (validateStep(steps[currentStep])) {
+        showFormPreview();
     }
+});
+
+function showFormPreview() {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    let previewContent = `
+        <h3>Resumen de tu Experiencia Personalizada</h3>
+        <ul>
+    `;
+    
+    for (const [key, value] of Object.entries(data)) {
+        if (value) {
+            let label = form.querySelector(`label[for="${key}"]`)?.textContent || key;
+            previewContent += `<li><strong>${label}:</strong> ${value}</li>`;
+        }
+    }
+    
+    previewContent += `
+        </ul>
+        <button id="edit-form" class="nav-btn">Editar</button>
+        <button id="confirm-form" class="submit-btn">Confirmar y Enviar</button>
+    `;
+    
+    const previewModal = document.createElement('div');
+    previewModal.className = 'preview-modal';
+    previewModal.innerHTML = previewContent;
+    
+    document.body.appendChild(previewModal);
+    
+    document.getElementById('edit-form').addEventListener('click', () => {
+        previewModal.remove();
+    });
+    
+    document.getElementById('confirm-form').addEventListener('click', () => {
+        sendWhatsAppMessage();
+        showThankYouMessage();
+        previewModal.remove();
+    });
+}
 
     saveProgressBtn.addEventListener('click', saveProgress);
 
