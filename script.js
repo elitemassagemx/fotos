@@ -378,7 +378,6 @@ function setupServiceCategories() {
     setupBenefitsNav('masajes');
     setupPackageNav();
 }
-
 function setupBenefitsNav(category) {
     const benefitsNav = document.querySelector('.benefits-nav');
     if (!benefitsNav) return;
