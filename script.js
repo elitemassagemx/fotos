@@ -378,7 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.src = buildImageUrl(data.benefitsIcons[index]);
                 img.alt = benefit;
                 const span = document.createElement('span');
-                span.textContent = benefitItem.appendChild(img);
+                span.textContent = benefit;
+                benefitItem.appendChild(img);
                 benefitItem.appendChild(span);
                 popupBenefits.appendChild(benefitItem);
             });
@@ -584,6 +585,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeButton = popup.querySelector('.close');
         if (!popup || !closeButton) return;
 
+        closeButton.innerHTML = `
+            <span class="visually-hidden">Cerrar ventana emergente</span>
+            X
+        `;
+
         closeButton.addEventListener('click', () => {
             console.log('Closing popup');
             popup.style.display = 'none';
@@ -606,7 +612,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Aquí deberías cargar las imágenes de la galería desde tu fuente de datos
         const galleryImages = [
             { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'quesoshm.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
@@ -619,14 +624,9 @@ document.addEventListener('DOMContentLoaded', () => {
             { src: 'lujo2.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
             { src: 'semillas.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
             { src: 'rosa.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
-
-
-
-            
         ];
 
-        // Configurar la cuadrícula con solo 3 imágenes
-        galleryImages.forEach(image => {
+        galleryImages.forEach((image, index) => {
             const galleryItem = document.createElement('div');
             galleryItem.classList.add('gallery-item');
             galleryItem.innerHTML = `
@@ -635,9 +635,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 class="image-title">${image.title}</h3>
                     <p class="image-description">${image.description}</p>
                 </div>
+                <a href="#" class="gallery-item-link" aria-label="Ver detalles de ${image.title}">
+                    <span class="visually-hidden">Ver detalles de ${image.title}</span>
+                </a>
             `;
-            galleryItem.addEventListener('click', () => {
-                showImageDetails(image);
+            const link = galleryItem.querySelector('.gallery-item-link');
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                showImageDetails(image, index);
             });
             galleryGrid.appendChild(galleryItem);
         });
@@ -647,12 +652,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function showImageDetails(image) {
+    function showImageDetails(image, index) {
         const modal = getElement('imageModal');
         const modalImg = getElement('modalImage');
         const modalDescription = getElement('modalDescription');
+        const closeButton = modal.querySelector('.close');
 
-        if (!modal || !modalImg || !modalDescription) {
+        if (!modal || !modalImg || !modalDescription || !closeButton) {
             console.error('Modal elements not found');
             return;
         }
@@ -660,7 +666,50 @@ document.addEventListener('DOMContentLoaded', () => {
         modalImg.src = buildImageUrl(image.src);
         modalImg.alt = image.title;
         modalDescription.innerHTML = `<h3>${image.title}</h3><p>${image.description}</p>`;
+        
+        closeButton.innerHTML = `
+            <span class="visually-hidden">Cerrar imagen de ${image.title}</span>
+            X
+        `;
+
+        const prevButton = document.createElement('button');
+        prevButton.classList.add('nav-button', 'prev-button');
+        prevButton.innerHTML = `
+            <span class="visually-hidden">Imagen anterior</span>
+            &lt;
+        `;
+        prevButton.addEventListener('click', () => navigateGallery(index - 1));
+
+        const nextButton = document.createElement('button');
+        nextButton.classList.add('nav-button', 'next-button');
+        nextButton.innerHTML = `
+            <span class="visually-hidden">Imagen siguiente</span>
+            &gt;
+        `;
+        nextButton.addEventListener('click', () => navigateGallery(index + 1));
+
+        modal.appendChild(prevButton);
+        modal.appendChild(nextButton);
+
         modal.style.display = 'block';
+    }
+
+    function navigateGallery(newIndex) {
+        const galleryImages = [
+            { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
+            { src: 'quesoshm.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
+            { src: 'paq41.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'lujo2.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'lujo.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'ach.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'paq2.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'lujo2.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'semillas.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+            { src: 'rosa.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
+        ];
+        const wrappedIndex = (newIndex + galleryImages.length) % galleryImages.length;
+        showImageDetails(galleryImages[wrappedIndex], wrappedIndex);
     }
 
     function setupGalleryAnimations() {
@@ -727,6 +776,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupGalleryModal() {
         const modal = getElement('imageModal');
         const closeBtn = modal.querySelector('.close');
+
+        closeBtn.innerHTML = `
+            <span class="visually-hidden">Cerrar imagen</span>
+            X
+        `;
 
         closeBtn.onclick = function() {
             modal.style.display = "none";
