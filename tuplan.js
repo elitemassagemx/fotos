@@ -151,6 +151,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Añadir esta función al archivo JavaScript existente
+
+function showFormPreview() {
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    let previewContent = `
+        <h3>Resumen de tu Experiencia Personalizada</h3>
+        <ul>
+    `;
+    
+    for (const [key, value] of Object.entries(data)) {
+        if (value) {
+            let label = form.querySelector(`label[for="${key}"]`)?.textContent || key;
+            previewContent += `<li><strong>${label}:</strong> ${value}</li>`;
+        }
+    }
+    
+    previewContent += `
+        </ul>
+        <button id="edit-form" class="nav-btn">Editar</button>
+        <button id="confirm-form" class="submit-btn">Confirmar y Enviar</button>
+    `;
+    
+    const previewModal = document.createElement('div');
+    previewModal.className = 'preview-modal';
+    previewModal.innerHTML = previewContent;
+    
+    document.body.appendChild(previewModal);
+    
+    document.getElementById('edit-form').addEventListener('click', () => {
+        previewModal.remove();
+    });
+    
+    document.getElementById('confirm-form').addEventListener('click', () => {
+        // Aquí iría la lógica para enviar el formulario
+        showThankYouMessage();
+        previewModal.remove();
+    });
+}
+
+// Modificar el evento submit del formulario para mostrar la vista previa
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (validateStep(steps[currentStep])) {
+        showFormPreview();
+    }
+});
+
     // Inicializar
     showStep(currentStep);
 });
+
