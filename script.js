@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.alt = benefit;
                 const span = document.createElement('span');
                 span.textContent = benefit;
-                benefitItem.appendChild(img);
+benefitItem.appendChild(img);
                 benefitItem.appendChild(span);
                 popupBenefits.appendChild(benefitItem);
             });
@@ -617,6 +617,12 @@ document.addEventListener('DOMContentLoaded', () => {
             { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
             { src: 'quesoshm.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
             { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
+            { src: 'paq41.webp', title: 'Paquete Experiencia Total', description: 'Disfruta de una experiencia completa de relajación y bienestar' },
+            { src: 'lujo2.webp', title: 'Masaje de Lujo', description: 'Sumérgete en el máximo lujo con nuestro masaje premium' },
+            { src: 'lujo.webp', title: 'Ambiente de Lujo', description: 'Relájate en nuestro ambiente de lujo diseñado para tu máximo confort' },
+            { src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
+            { src: 'paq2.webp', title: 'Paquete Pareja', description: 'Comparte un momento especial con tu pareja en nuestro spa' },
+            { src: 'semillas.webp', title: 'Masaje con Semillas', description: 'Prueba nuestro innovador masaje con semillas calientes' }
         ];
 
         galleryImages.forEach((image, index) => {
@@ -695,16 +701,15 @@ document.addEventListener('DOMContentLoaded', () => {
             { src: 'paq41.webp', title: 'Paquete Experiencia Total', description: 'Disfruta de una experiencia completa de relajación y bienestar' },
             { src: 'lujo2.webp', title: 'Masaje de Lujo', description: 'Sumérgete en el máximo lujo con nuestro masaje premium' },
             { src: 'lujo.webp', title: 'Ambiente de Lujo', description: 'Relájate en nuestro ambiente de lujo diseñado para tu máximo confort' },
-            { src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
+{ src: 'ach.webp', title: 'Aromaterapia', description: 'Experimenta los beneficios de la aromaterapia en tu masaje' },
             { src: 'paq2.webp', title: 'Paquete Pareja', description: 'Comparte un momento especial con tu pareja en nuestro spa' },
-            { src: 'semillas.webp', title: 'Masaje con Semillas', description: 'Prueba nuestro innovador masaje con semillas calientes' },
-            { src: 'rosa.webp', title: 'Experiencia Floral', description: 'Relájate con nuestra experiencia de masaje con esencias florales' }
+            { src: 'semillas.webp', title: 'Masaje con Semillas', description: 'Prueba nuestro innovador masaje con semillas calientes' }
         ];
         const wrappedIndex = (newIndex + galleryImages.length) % galleryImages.length;
         showImageDetails(galleryImages[wrappedIndex], wrappedIndex);
     }
 
-  function setupGalleryAnimations() {
+    function setupGalleryAnimations() {
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
             console.warn('GSAP or ScrollTrigger not loaded. Gallery animations will not work.');
             return;
