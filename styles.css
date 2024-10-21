@@ -17,23 +17,27 @@
 }
 
 /* Reset y estilos base */
-body, h1, h2, h3, p, ul {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
 body {
     font-family: 'Quattrocento', serif;
-    font-size: 16px;
     line-height: 1.6;
     background-color: var(--background-color);
     color: var(--text-color);
     padding-bottom: 60px;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    transition: background-color 0.3s ease, color 0.3s ease;
     padding-top: 60px; /* Ajustado para el header fijo */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 h1, h2, h3 {
@@ -48,6 +52,7 @@ h2 {
 img {
     max-width: 100%;
     height: auto;
+    display: block;
 }
 
 a, button {
@@ -62,7 +67,6 @@ a, button {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
-    box-sizing: border-box;
 }
 
 /* Header y navegación */
@@ -208,8 +212,6 @@ h1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 2rem;
-    padding: 0 15px;
-    box-sizing: border-box;
 }
 
 .service-item, .package-item {
@@ -516,7 +518,9 @@ h1 {
     cursor: pointer;
 }
 
-/* Estilos para la barra fija (continuación) */
+/* Continuación del CSS principal */
+
+/* Estilos para la barra fija */
 .fixed-bar {
     position: fixed;
     bottom: 0;
