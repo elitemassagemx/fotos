@@ -1,11 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('plan-form');
+    const steps = form.querySelectorAll('.form-step');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
-    const saveProgressBtn = document.querySelector('.save-progress-btn');
+    const formProgressBar = document.getElementById('formProgressBar');
+    const headerProgressBar = document.getElementById('headerProgressBar');
+    let currentStep = 0;
 
-    function validateForm() {
-        const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+    function showStep(stepIndex) {
+        steps.forEach((step, index) => {
+            step.classList.toggle('active', index === stepIndex);
+        });
+        prevBtn.style.display = stepIndex === 0 ? 'none' : 'block';
+        nextBtn.style.display = stepIndex === steps.length - 1 ? 'none' : 'block';
+        submitBtn.style.display = stepIndex === steps.length - 1 ? 'block' : 'none';
+        updateProgressBar();
+    }
+
+    function updateProgressBar() {
+        const progress = ((currentStep + 1) / steps.length) * 100;
+        formProgressBar.style.width = `${progress}%`;
+        headerProgressBar.style.width = `${progress}%`;
+    }
+
+    function validateStep(stepIndex) {
+        const currentStepElement = steps[stepIndex];
+        const inputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]');
         let isValid = true;
+
         inputs.forEach(input => {
             if (!input.value.trim()) {
                 isValid = false;
@@ -16,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideErrorMessage(input);
             }
         });
+
         return isValid;
     }
 
@@ -36,14 +60,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    if (submitBtn) {
-        submitBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (validateForm()) {
-                showFormPreview();
-            }
-        });
-    }
+    nextBtn.addEventListener('click', () => {
+        if (validateStep(currentStep)) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        currentStep--;
+        showStep(currentStep);
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (validateStep(currentStep)) {
+            // Aquí puedes agregar el código para enviar el formulario
+            console.log('Formulario enviado');
+            showThankYouMessage();
+        }
+    });
 
     function showThankYouMessage() {
         const thankYouMessage = document.createElement('div');
@@ -59,40 +95,10 @@ document.addEventListener('DOMContentLoaded', function() {
         closeBtn.addEventListener('click', () => {
             thankYouMessage.remove();
             form.reset();
+            currentStep = 0;
+            showStep(currentStep);
         });
     }
-
-    if (saveProgressBtn) {
-        saveProgressBtn.addEventListener('click', saveProgress);
-    }
-
-    function saveProgress() {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        localStorage.setItem('eliteMassageProgress', JSON.stringify(data));
-        alert('Tu progreso ha sido guardado. Puedes continuar más tarde.');
-    }
-
-    function loadProgress() {
-        const savedProgress = localStorage.getItem('eliteMassageProgress');
-        if (savedProgress) {
-            const data = JSON.parse(savedProgress);
-            Object.keys(data).forEach(key => {
-                const input = form.querySelector(`[name="${key}"]`);
-                if (input) {
-                    if (input.type === 'checkbox' || input.type === 'radio') {
-                        input.checked = input.value === data[key];
-                    } else {
-                        input.value = data[key];
-                    }
-                }
-            });
-            alert('Tu progreso ha sido cargado. Puedes continuar desde donde lo dejaste.');
-        }
-    }
-
-    // Cargar progreso al iniciar
-    loadProgress();
 
     // Manejar campos condicionales
     const otroTipoEvento = document.getElementById('otro-tipo-evento');
@@ -115,82 +121,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function showFormPreview() {
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        
-        let previewContent = `
-            <h3>Resumen de tu Experiencia Personalizada</h3>
-            <ul>
-        `;
-        
-        for (const [key, value] of Object.entries(data)) {
-            if (value) {
-                let label = form.querySelector(`label[for="${key}"]`)?.textContent || key;
-                previewContent += `<li><strong>${label}:</strong> ${value}</li>`;
-            }
-        }
-        
-        previewContent += `
-            </ul>
-            <button id="edit-form" class="nav-btn">Editar</button>
-            <button id="confirm-form" class="submit-btn">Confirmar y Enviar</button>
-        `;
-        
-        const previewModal = document.createElement('div');
-        previewModal.className = 'preview-modal';
-        previewModal.innerHTML = previewContent;
-        
-        document.body.appendChild(previewModal);
-        
-        document.getElementById('edit-form').addEventListener('click', () => {
-            previewModal.remove();
-        });
-        
-        document.getElementById('confirm-form').addEventListener('click', () => {
-            sendWhatsAppMessage();
-            showThankYouMessage();
-            previewModal.remove();
-        });
-    }
-
-    function sendWhatsAppMessage() {
-        const formData = new FormData(form);
-        let message = "Hola! Me gustaría reservar una experiencia personalizada en Elite Massage:\n\n";
-
-        const fieldLabels = {
-            'tipo-evento': 'Tipo de evento',
-            'numero-personas': 'Número de personas',
-            'duracion': 'Duración',
-            'enfoque-masaje': 'Enfoque del masaje',
-            'obsequios': 'Obsequios',
-            'decoracion-tematica': 'Decoración temática',
-            'musica': 'Música/DJ',
-            'catering': 'Catering',
-            'ambiente': 'Ambiente',
-            'nombre': 'Nombre',
-            'telefono': 'Teléfono',
-            'email': 'Email',
-            'fecha': 'Fecha preferida'
-        };
-
-        for (let [key, value] of formData.entries()) {
-            if (value) {
-                const label = fieldLabels[key] || key;
-                if (key === 'obsequios') {
-                    const obsequios = formData.getAll('obsequios');
-                    message += `${label}: ${obsequios.join(', ')}\n`;
-                } else if (key === 'decoracion-tematica' || key === 'musica' || key === 'catering') {
-                    message += `${label}: ${value === 'on' ? 'Sí' : 'No'}\n`;
-                } else {
-                    message += `${label}: ${value}\n`;
-                }
-            }
-        }
-
-        const phoneNumber = '5215640020305'; // Número de WhatsApp de Elite Massage
-        const encodedMessage = encodeURIComponent(message);
-        const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
-        window.open(url, '_blank');
-    }
+    // Inicializar el formulario mostrando el primer paso
+    showStep(currentStep);
 });
