@@ -4,7 +4,6 @@
     margin: 0 auto;
     padding: 20px;
 }
-
 #paqcarr-container .main-image-container {
     width: 100%;
     height: 400px;
@@ -12,13 +11,11 @@
     position: relative;
     margin-bottom: 20px;
 }
-
 #paqcarr-container .main-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-
 #paqcarr-container .image-info {
     position: absolute;
     bottom: 0;
@@ -28,35 +25,29 @@
     color: white;
     padding: 10px;
 }
-
 #paqcarr-container .image-nav-container {
     width: 100%;
     overflow-x: auto;
 }
-
 #paqcarr-container .image-nav {
     display: flex;
     gap: 10px;
 }
-
 #paqcarr-container .image-nav-item {
     flex: 0 0 auto;
     width: 100px;
     cursor: pointer;
 }
-
 #paqcarr-container .image-nav-item img {
     width: 100%;
     height: 60px;
     object-fit: cover;
 }
-
 #paqcarr-container .image-nav-caption {
     font-size: 12px;
     text-align: center;
     margin-top: 5px;
 }
-
 #paqcarr-container .image-nav-item.active {
     border: 2px solid #007bff;
 }
