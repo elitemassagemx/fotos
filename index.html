@@ -50,14 +50,14 @@
             </div>
         </section>
 
-<section id="carrusel-elite" class="section carrusel-section">
-    <div class="container">
-        <h2>Nuestras Instalaciones</h2>
-        <div id="carrusel-container">
-            <!-- El contenido del carrusel se cargará aquí dinámicamente -->
-        </div>
-    </div>
-</section>
+        <section id="carrusel-elite" class="section carrusel-section">
+            <div class="container">
+                <h2>Nuestras Instalaciones</h2>
+                <div id="carrusel-container">
+                    <!-- El contenido del carrusel se cargará aquí dinámicamente -->
+                </div>
+            </div>
+        </section>
         
         <section id="servicios" class="section services">
             <div class="container">
@@ -67,8 +67,10 @@
                     <label for="masajes">Masajes</label>
                     <input type="radio" id="experiencias" name="category" value="experiencias">
                     <label for="experiencias">Experiencias</label>
-                    <input type="radio" id="paquetes" name="category" value="paquetes">
-                    <label for="paquetes">Paquetes</label>
+                    <a href="tuplan.html" class="planea-tu-experiencia-btn">
+                        <img src="https://elitemassagemx.github.io/Home/IMG/planea-icon.webp" alt="Icono planea" class="planea-icon">
+                        Planea tu experiencia
+                    </a>
                 </div>
                 <div class="benefits-nav">
                     <!-- Los botones de beneficios se generarán dinámicamente con JavaScript -->
@@ -77,8 +79,7 @@
             </div>
         </section>
 
-
-         <section id="galeria" class="section gallery gallery-container">
+        <section id="galeria" class="section gallery gallery-container">
             <div class="container">
                 <h2>Inspirate con nuestras opciones</h2>
                 <div class="gallery-grid">
@@ -91,7 +92,14 @@
         <section id="paquetes" class="section packages">
             <div class="container">
                 <h2>Nuestros Paquetes</h2>
-                
+                <div class="package-category-toggle">
+                    <input type="radio" id="experiencias-paquetes" name="package-category" value="experiencias" checked>
+                    <label for="experiencias-paquetes">Experiencias</label>
+                    <a href="tuplan.html" class="planea-tu-experiencia-btn">
+                        <img src="https://elitemassagemx.github.io/Home/IMG/planea-icon.webp" alt="Icono planea" class="planea-icon">
+                        Planea tu experiencia
+                    </a>
+                </div>
                 <div class="package-nav">
                     <!-- Los botones de navegación de paquetes se generarán dinámicamente con JavaScript -->
                 </div>
@@ -244,8 +252,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
     
-
-    
     <!-- Script para cargar el carrusel -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -261,7 +267,7 @@
     
     <!-- Tu script personalizado -->
     <script src="script.js"></script>
-        <!-- Carrusel JS -->
+    <!-- Carrusel JS -->
     <script src="carrusel.js"></script>
 </body>
 </html>
