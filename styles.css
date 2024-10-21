@@ -887,12 +887,12 @@ a:focus, button:focus {
 
 /* Additional spacing between sections */
 .section + .section {
-    margin-top: 60px;
+    margin-top: 30px; /* Reduced from 60px to 30px */
 }
 
 /* Styles for package navigation */
 .package-nav {
-    margin-bottom: 40px;
+    margin-bottom: 20px; /* Reduced from 40px to 20px */
 }
 
 .package-btn {
@@ -914,6 +914,23 @@ a:focus, button:focus {
     width: 24px;
     height: 24px;
     margin-right: 5px;
+}
+
+/* Estilo para el enlace "Personaliza" */
+.personaliza-link {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: var(--item-background);
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.personaliza-link:hover {
+    background-color: var(--primary-color);
+    color: var(--background-color);
 }
 
 /* Mobile-specific adjustments */
@@ -947,7 +964,8 @@ a:focus, button:focus {
         font-size: 1.5rem;
     }
 
-    .service-category-toggle label {
+    .service-category-toggle label,
+    .personaliza-link {
         padding: 8px 15px;
         font-size: 12px;
     }
@@ -988,5 +1006,14 @@ a:focus, button:focus {
 
     .nav-text {
         font-size: 8px;
+    }
+
+    .section {
+        padding: 15px 0;
+        margin-bottom: 5px;
+    }
+
+    .section + .section {
+        margin-top: 15px;
     }
 }
