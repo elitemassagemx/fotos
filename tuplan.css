@@ -1,120 +1,74 @@
-:root {
-    --primary-color: #8a6d3b;
-    --secondary-color: #d4af37;
-    --background-color: #f9f5ea;
-    --text-color: #333;
-    --border-color: #ccc;
+.option-item.selected {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
-body {
-    font-family: 'Roboto', sans-serif;
-    line-height: 1.6;
-    color: var(--text-color);
-    background-color: var(--background-color);
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.fixed-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 1000;
-}
-
-.header-top {
+.form-navigation {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
+    margin-top: 2rem;
 }
 
-.logo-container {
-    display: flex;
-    align-items: center;
+.nav-btn, .submit-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.logo {
-    width: 50px;
-    height: auto;
-    margin-right: 10px;
-}
-
-h1, h2, h3, h4 {
-    font-family: 'Playfair Display', serif;
-    color: var(--primary-color);
-}
-
-.progress-container {
-    width: 100%;
-    height: 5px;
-    background: #f0f0f0;
+.nav-btn:hover, .submit-btn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.progress {
+    width: 0;
     height: 100%;
-    background: var(--secondary-color);
-    width: 0%;
+    background-color: var(--secondary-color);
     transition: width 0.3s ease;
 }
 
-.tu-plan {
-    padding-top: 100px;
-    padding-bottom: 50px;
+input[type="text"], input[type="tel"], input[type="email"], input[type="date"], textarea {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
 }
 
-.plan-form {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    padding: 30px;
-    margin-top: 30px;
+input[type="text"]:focus, input[type="tel"]:focus, input[type="email"]:focus, input[type="date"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
 }
 
-.form-step {
+.hidden {
     display: none;
 }
 
-.form-step.active {
-    display: block;
-}
-
-.option-group {
+.toggle-container {
     display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.option-item {
-    flex: 1 1 calc(50% - 15px);
-    background-color: #f9f9f9;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
     justify-content: space-between;
-}
-
-.option-item:hover {
-    background-color: #f0f0f0;
-}
-
-.option-item input[type="radio"],
-.option-item input[type="checkbox"] {
-    margin-right: 10px;
+    align-items: center;
 }
 
 .toggle-switch {
@@ -130,7 +84,7 @@ h1, h2, h3, h4 {
     height: 0;
 }
 
-.toggle-slider {
+.toggle-switch label {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -142,7 +96,7 @@ h1, h2, h3, h4 {
     border-radius: 34px;
 }
 
-.toggle-slider:before {
+.toggle-switch label:before {
     position: absolute;
     content: "";
     height: 26px;
@@ -154,115 +108,61 @@ h1, h2, h3, h4 {
     border-radius: 50%;
 }
 
-input:checked + .toggle-slider {
+.toggle-switch input:checked + label {
     background-color: var(--secondary-color);
 }
 
-input:checked + .toggle-slider:before {
+.toggle-switch input:checked + label:before {
     transform: translateX(26px);
 }
 
-textarea, input[type="text"], input[type="tel"], input[type="email"], input[type="date"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-.form-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-}
-
-.nav-btn, .submit-btn, .save-progress-btn {
-    padding: 12px 25px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.nav-btn:hover, .submit-btn:hover, .save-progress-btn:hover {
-    background-color: var(--secondary-color);
-}
-
-.hidden {
-    display: none;
-}
-
-footer {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 20px 0;
-    text-align: center;
-}
-
-.social-media a {
-    color: white;
-    font-size: 20px;
-    margin: 0 10px;
-    transition: color 0.3s ease;
-}
-
-.social-media a:hover {
-    color: var(--secondary-color);
-}
-
 @media (max-width: 768px) {
-    .option-item {
-        flex: 1 1 100%;
+    .option-group {
+        grid-template-columns: 1fr;
     }
     
     .form-navigation {
         flex-direction: column;
-        gap: 10px;
+        gap: 1rem;
     }
     
-    .nav-btn, .submit-btn, .save-progress-btn {
+    .nav-btn, .submit-btn {
         width: 100%;
     }
 }
 
-/* Añadir estos estilos al archivo CSS existente */
+/* Animaciones adicionales */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
 
-.preview-modal {
-    position: fixed;
-    top: 50%;
+.option-item:active {
+    animation: pulse 0.3s;
+}
+
+/* Tooltip para opciones */
+.option-item {
+    position: relative;
+}
+
+.option-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
-    z-index: 1000;
-    max-width: 80%;
-    max-height: 80%;
-    overflow-y: auto;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
-.preview-modal h3 {
-    margin-top: 0;
-    color: var(--primary-color);
-}
-
-.preview-modal ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.preview-modal li {
-    margin-bottom: 10px;
-}
-
-.preview-modal button {
-    margin-top: 20px;
-    margin-right: 10px;
+.option-item:hover::after {
+    opacity: 1;
 }
