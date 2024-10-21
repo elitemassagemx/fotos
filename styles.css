@@ -1,5 +1,8 @@
 /* Importaciones */
 @import url('galeria.css');
+@import url('carrusel.css');
+@import url('paqcarr.css');
+@import url('tuplan.css');
 
 :root {
     --primary-color: #D4AF37;
