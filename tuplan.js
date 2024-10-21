@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function sendWhatsAppMessage(message) {
-        const phoneNumber = '1234567890'; // Reemplaza con el número de WhatsApp de Elite Massage
+        const phoneNumber = '5215640020305'; // Reemplaza con el número de WhatsApp de Elite Massage
         window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
     }
 
