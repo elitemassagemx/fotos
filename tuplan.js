@@ -4,13 +4,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const submitBtn = document.getElementById('submit-btn');
-    const progressBar = document.querySelector('.progress-bar');
+    const formProgressBar = document.getElementById('formProgressBar');
+    const headerProgressBar = document.getElementById('headerProgressBar');
     const saveProgressBtn = document.querySelector('.save-progress-btn');
     let currentStep = 0;
 
     function showStep(stepIndex) {
         steps.forEach((step, index) => {
-            step.style.display = index === stepIndex ? 'block' : 'none';
+            step.classList.toggle('active', index === stepIndex);
         });
         prevBtn.style.display = stepIndex === 0 ? 'none' : 'inline-block';
         nextBtn.style.display = stepIndex === steps.length - 1 ? 'none' : 'inline-block';
@@ -20,7 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateProgressBar() {
         const progress = ((currentStep + 1) / steps.length) * 100;
-        progressBar.style.width = `${progress}%`;
+        formProgressBar.style.width = `${progress}%`;
+        headerProgressBar.style.width = `${progress}%`;
     }
 
     function validateStep(step) {
@@ -57,17 +59,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     nextBtn.addEventListener('click', () => {
-        if (validateStep(steps[currentStep]) && currentStep < steps.length - 1) {
+        if (validateStep(steps[currentStep])) {
             currentStep++;
             showStep(currentStep);
         }
     });
 
     prevBtn.addEventListener('click', () => {
-        if (currentStep > 0) {
-            currentStep--;
-            showStep(currentStep);
-        }
+        currentStep--;
+        showStep(currentStep);
     });
 
     form.addEventListener('submit', (e) => {
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const thankYouMessage = document.createElement('div');
         thankYouMessage.className = 'thank-you-message';
         thankYouMessage.innerHTML = `
-            <h3>¡Gracias por preconfigurar tu experiencia!</h3>
+            <h3>¡Gracias por personalizar tu experiencia!</h3>
             <p>Nuestro equipo de expertos en bienestar revisará tu solicitud y te contactará pronto para finalizar los detalles de tu experiencia en Elite Massage.</p>
             <button class="close-message-btn">Cerrar</button>
         `;
@@ -105,12 +105,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveProgress() {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
-        localStorage.setItem('tuPlanProgress', JSON.stringify(data));
+        localStorage.setItem('eliteMassageProgress', JSON.stringify(data));
         alert('Tu progreso ha sido guardado. Puedes continuar más tarde.');
     }
 
     function loadProgress() {
-        const savedProgress = localStorage.getItem('tuPlanProgress');
+        const savedProgress = localStorage.getItem('eliteMassageProgress');
         if (savedProgress) {
             const data = JSON.parse(savedProgress);
             Object.keys(data).forEach(key => {
@@ -130,31 +130,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar progreso al iniciar
     loadProgress();
 
-    // Inicializar tooltips
-    const tooltips = document.querySelectorAll('[data-tooltip]');
-    tooltips.forEach(tooltip => {
-        tooltip.addEventListener('mouseover', showTooltip);
-        tooltip.addEventListener('mouseout', hideTooltip);
-    });
+    // Manejar campos condicionales
+    const otroTipoEvento = document.getElementById('otro-tipo-evento');
+    const otroEnfoqueMasaje = document.getElementById('otro-enfoque-masaje');
+    const temaDecoracion = document.getElementById('tema-decoracion');
+    const tipoCatering = document.getElementById('tipo-catering');
 
-    function showTooltip(e) {
-        const tooltipText = e.target.getAttribute('data-tooltip');
-        const tooltipEl = document.createElement('div');
-        tooltipEl.className = 'tooltip';
-        tooltipEl.textContent = tooltipText;
-        document.body.appendChild(tooltipEl);
-
-        const rect = e.target.getBoundingClientRect();
-        tooltipEl.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        tooltipEl.style.left = `${rect.left + window.scrollX}px`;
-    }
-
-    function hideTooltip() {
-        const tooltip = document.querySelector('.tooltip');
-        if (tooltip) {
-            tooltip.remove();
+    form.addEventListener('change', (e) => {
+        if (e.target.name === 'tipo-evento') {
+            otroTipoEvento.classList.toggle('hidden', e.target.value !== 'otro');
         }
-    }
+        if (e.target.name === 'enfoque-masaje') {
+            otroEnfoqueMasaje.classList.toggle('hidden', e.target.value !== 'otro');
+        }
+        if (e.target.name === 'decoracion-tematica') {
+            temaDecoracion.classList.toggle('hidden', !e.target.checked);
+        }
+        if (e.target.name === 'catering') {
+            tipoCatering.classList.toggle('hidden', !e.target.checked);
+        }
+    });
 
     // Inicializar
     showStep(currentStep);
