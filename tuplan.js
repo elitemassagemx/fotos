@@ -198,11 +198,48 @@ document.addEventListener('DOMContentLoaded', function() {
         return encodeURIComponent(message);
     }
 
-    function sendWhatsAppMessage(message) {
-        const phoneNumber = '5215640020305'; // Reemplaza con el número de WhatsApp de Elite Massage
-        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+function sendWhatsAppMessage() {
+    const formData = new FormData(document.getElementById('plan-form'));
+    let message = "Hola! Me gustaría reservar una experiencia personalizada en Elite Massage:\n\n";
+
+    // Mapeo de nombres de campos a etiquetas legibles
+    const fieldLabels = {
+        'tipo-evento': 'Tipo de evento',
+        'numero-personas': 'Número de personas',
+        'duracion': 'Duración',
+        'enfoque-masaje': 'Enfoque del masaje',
+        'obsequios': 'Obsequios',
+        'decoracion-tematica': 'Decoración temática',
+        'musica': 'Música/DJ',
+        'catering': 'Catering',
+        'ambiente': 'Ambiente',
+        'nombre': 'Nombre',
+        'telefono': 'Teléfono',
+        'email': 'Email',
+        'fecha': 'Fecha preferida'
+    };
+
+    for (let [key, value] of formData.entries()) {
+        if (value) {
+            const label = fieldLabels[key] || key;
+            if (key === 'obsequios') {
+                // Para checkboxes, podemos tener múltiples valores
+                const obsequios = formData.getAll('obsequios');
+                message += `${label}: ${obsequios.join(', ')}\n`;
+            } else if (key === 'decoracion-tematica' || key === 'musica' || key === 'catering') {
+                // Para toggles, convertimos a Sí/No
+                message += `${label}: ${value === 'on' ? 'Sí' : 'No'}\n`;
+            } else {
+                message += `${label}: ${value}\n`;
+            }
+        }
     }
 
+    const phoneNumber = '5215640020305'; // Número de WhatsApp de Elite Massage
+    const encodedMessage = encodeURIComponent(message);
+    const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    window.open(url, '_blank');
+}
     // Inicializar
     showStep(currentStep);
 });
