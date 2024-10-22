@@ -144,6 +144,9 @@ const DOMManager = {
         element?.classList.toggle(className, force);
     }
 };
+// ==========================================
+// SISTEMAS Y UTILIDADES
+// ==========================================
 
 // Sistema de Caché
 const CacheManager = {
@@ -175,6 +178,59 @@ const CacheManager = {
 
     remove(key) {
         this.cache.delete(key);
+    }
+};
+
+// Utilidades
+const Utils = {
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+
+    throttle(func, limit) {
+        let inThrottle;
+        return function executedFunction(...args) {
+            if (!inThrottle) {
+                func(...args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    },
+
+    formatPrice(price) {
+        return new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN'
+        }).format(price);
+    },
+
+    sanitizeHTML(str) {
+        const temp = document.createElement('div');
+        temp.textContent = str;
+        return temp.innerHTML;
+    },
+
+    generateUniqueId() {
+        return `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    },
+
+    isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
     }
 };
 
@@ -225,11 +281,128 @@ const ErrorHandler = {
     }
 };
 
+// Sistema de Plantillas
+const TemplateManager = {
+    templates: new Map(),
+
+    async loadTemplate(name) {
+        try {
+            const cached = CacheManager.get(`template-${name}`);
+            if (cached) return cached;
+
+            const response = await fetch(`templates/${name}.html`);
+            const text = await response.text();
+            const template = this.compile(text);
+            
+            CacheManager.set(`template-${name}`, template);
+            return template;
+        } catch (error) {
+            ErrorHandler.log(error, `Loading template: ${name}`);
+            return null;
+        }
+    },
+
+    compile(template) {
+        return (data) => {
+            return template.replace(/\${(.*?)}/g, (match, key) => {
+                return data[key.trim()] || '';
+            });
+        };
+    },
+
+    render(templateName, data) {
+        const template = this.templates.get(templateName);
+        if (!template) {
+            ErrorHandler.log(`Template not found: ${templateName}`);
+            return '';
+        }
+        return template(data);
+    }
+};
+
+// Analytics Manager
+const AnalyticsManager = {
+    events: [],
+
+    trackEvent(category, action, label = null) {
+        const event = {
+            category,
+            action,
+            label,
+            timestamp: new Date()
+        };
+        
+        this.events.push(event);
+        
+        if (typeof ga !== 'undefined') {
+            ga('send', 'event', category, action, label);
+        }
+    },
+
+    trackPageView(page) {
+        if (typeof ga !== 'undefined') {
+            ga('send', 'pageview', page);
+        }
+    },
+
+    getEventsByCategory(category) {
+        return this.events.filter(event => event.category === category);
+    }
+};
+
+// Performance Monitor
+const PerformanceMonitor = {
+    metrics: new Map(),
+    
+    startMeasure(name) {
+        this.metrics.set(name, performance.now());
+    },
+
+    endMeasure(name) {
+        const startTime = this.metrics.get(name);
+        if (startTime) {
+            const duration = performance.now() - startTime;
+            this.metrics.delete(name);
+            return duration;
+        }
+        return null;
+    },
+
+    logPerformance(name, duration) {
+        console.log(`Performance ${name}: ${duration.toFixed(2)}ms`);
+        AnalyticsManager.trackEvent('Performance', name, duration.toFixed(2));
+    }
+};
+
+// Service Worker Manager
+const ServiceWorkerManager = {
+    async register() {
+        if ('serviceWorker' in navigator) {
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                console.log('ServiceWorker registration successful');
+                return registration;
+            } catch (error) {
+                ErrorHandler.log(error, 'ServiceWorker registration');
+                return null;
+            }
+        }
+        return null;
+    },
+
+    async unregister() {
+        if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.ready;
+            await registration.unregister();
+        }
+    }
+};
+
 // ==========================================
 // CONTROLADORES PRINCIPALES
 // ==========================================
 
-// Controlador de servicios
+// ServicesController - Controlador de servicios
 const ServicesController = {
     async loadServices() {
         try {
@@ -276,7 +449,7 @@ const ServicesController = {
         const services = AppState.services[category];
 
         if (!Array.isArray(services)) {
-            console.error(`Invalid services data for category: ${category}`);
+            ErrorHandler.log(`Invalid services data for category: ${category}`);
             servicesList.innerHTML = '<p>Error al cargar los servicios.</p>';
             return;
         }
@@ -370,7 +543,6 @@ const ServicesController = {
                     this.renderServices(category);
                     UIController.setupBenefitsNav(category);
 
-                    // Sincronizar los radio buttons entre grupos
                     const otherGroup = groupIndex === 0 ? categoryGroups[1] : categoryGroups[0];
                     const correspondingInput = otherGroup.querySelector(`input[value="${category}"]`);
                     if (correspondingInput) {
@@ -380,10 +552,10 @@ const ServicesController = {
             });
         });
 
-        // Configuración inicial
         UIController.setupBenefitsNav('masajes');
     },
 
+// Continuación de ServicesController
     setupPackageNav() {
         const packageNav = document.querySelector('.package-nav');
         if (!packageNav) return;
@@ -494,12 +666,7 @@ const ServicesController = {
     }
 };
 
-
-// ==========================================
-// CONTROLADORES DE UI Y POPUP
-// ==========================================
-
-// Controlador de UI
+// UIController
 const UIController = {
     setupFilters() {
         this.setupBenefitsNav(AppState.currentCategory);
@@ -649,18 +816,15 @@ const PopupController = {
         if (!popup || !closeButton) return;
 
         EventManager.add(closeButton, 'click', () => {
-            console.log('Closing popup');
             popup.style.display = 'none';
         });
 
         EventManager.add(window, 'click', (event) => {
             if (event.target === popup) {
-                console.log('Closing popup (clicked outside)');
                 popup.style.display = 'none';
             }
         });
 
-        // Navegación con teclado
         EventManager.add(window, 'keydown', (e) => {
             if (popup.style.display === 'block') {
                 if (e.key === 'Escape') {
@@ -677,7 +841,6 @@ const PopupController = {
     },
 
     showPopup(data, index, isPackage = false) {
-        console.log('Showing popup for:', data.title);
         const popup = DOMManager.getElement('popup');
         const elements = {
             content: popup.querySelector('.popup-content'),
@@ -818,10 +981,6 @@ const PopupController = {
     }
 };
 
-// ==========================================
-// CONTROLADORES DE CARRUSEL Y GALERÍA
-// ==========================================
-
 // CarouselController
 const CarouselController = {
     async loadCarouselContent() {
@@ -896,14 +1055,20 @@ const CarouselController = {
 
         showSlide(0);
 
+        this.setupCarouselNavigation(carousel, showSlide, items.length, currentIndex);
+    },
+
+    setupCarouselNavigation(carousel, showSlide, itemsLength, currentIndex) {
+        // Keyboard navigation
         EventManager.add(carousel, 'keydown', (e) => {
             if (e.key === 'ArrowRight') {
-                showSlide((currentIndex + 1) % items.length);
+                showSlide((currentIndex + 1) % itemsLength);
             } else if (e.key === 'ArrowLeft') {
-                showSlide((currentIndex - 1 + items.length) % items.length);
+                showSlide((currentIndex - 1 + itemsLength) % itemsLength);
             }
         });
 
+        // Touch navigation
         let touchstartX = 0;
         let touchendX = 0;
 
@@ -914,10 +1079,10 @@ const CarouselController = {
         EventManager.add(carousel, 'touchend', (e) => {
             touchendX = e.changedTouches[0].screenX;
             if (touchendX < touchstartX) {
-                showSlide((currentIndex + 1) % items.length);
+                showSlide((currentIndex + 1) % itemsLength);
             }
             if (touchendX > touchstartX) {
-                showSlide((currentIndex - 1 + items.length) % items.length);
+                showSlide((currentIndex - 1 + itemsLength) % itemsLength);
             }
         });
     },
@@ -975,7 +1140,6 @@ const CarouselController = {
         });
     }
 };
-
 // GalleryController
 const GalleryController = {
     init() {
@@ -1118,147 +1282,14 @@ const GalleryController = {
     }
 };
 
-// ==========================================
-// CONTROLADORES RESPONSIVE Y ANIMACIÓN
-// ==========================================
-
-// ResponsiveController
-const ResponsiveController = {
-    init() {
-        this.setupResponsiveNavigation();
-        this.setupScrollHandling();
-        this.setupResizeHandling();
-        this.initializeMediaQueries();
-        this.setupSmoothScrolling();
-    },
-
-    setupResponsiveNavigation() {
-        const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(link => {
-            EventManager.add(link, 'click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                const targetSection = DOMManager.getElement(targetId);
-                if (targetSection) {
-                    targetSection.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-    },
-
-    setupScrollHandling() {
-        let lastScroll = 0;
-        const header = DOMManager.getElement('main-header');
-        const fixedBar = document.querySelector('.fixed-bar');
-
-        EventManager.add(window, 'scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (header) {
-                header.classList.toggle('scrolled', currentScroll > 100);
-                header.classList.toggle('header-hidden', currentScroll > lastScroll && currentScroll > 200);
-            }
-
-            if (fixedBar) {
-                fixedBar.classList.toggle('bar-hidden', currentScroll < lastScroll);
-            }
-
-            lastScroll = currentScroll;
-        });
-    },
-
-    setupResizeHandling() {
-        const handleResize = () => {
-            const width = window.innerWidth;
-            document.body.classList.toggle('is-mobile', width < 768);
-            document.body.classList.toggle('is-tablet', width >= 768 && width < 1024);
-            document.body.classList.toggle('is-desktop', width >= 1024);
-            
-            this.adjustLayoutForScreenSize(width);
-        };
-
-        EventManager.add(window, 'resize', handleResize);
-        handleResize();
-    },
-
-    adjustLayoutForScreenSize(width) {
-        if (width < 768) {
-            this.optimizeForMobile();
-        } else if (width < 1024) {
-            this.optimizeForTablet();
-        } else {
-            this.optimizeForDesktop();
-        }
-    },
-
-    optimizeForMobile() {
-        document.documentElement.style.setProperty('--base-font-size', '14px');
-        document.documentElement.style.setProperty('--heading-font-size', '1.5rem');
-        document.documentElement.style.setProperty('--container-padding', '10px');
-        document.documentElement.style.setProperty('--section-spacing', '30px');
-    },
-
-    optimizeForTablet() {
-        document.documentElement.style.setProperty('--base-font-size', '15px');
-        document.documentElement.style.setProperty('--heading-font-size', '1.75rem');
-        document.documentElement.style.setProperty('--container-padding', '20px');
-        document.documentElement.style.setProperty('--section-spacing', '40px');
-    },
-
-    optimizeForDesktop() {
-        document.documentElement.style.setProperty('--base-font-size', '16px');
-        document.documentElement.style.setProperty('--heading-font-size', '2rem');
-        document.documentElement.style.setProperty('--container-padding', '30px');
-        document.documentElement.style.setProperty('--section-spacing', '60px');
-    },
-
-    initializeMediaQueries() {
-        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-        
-        darkModeMediaQuery.addListener(e => this.handleDarkModeChange(e));
-        reducedMotionMediaQuery.addListener(e => this.handleReducedMotionChange(e));
-    },
-
-    handleDarkModeChange(e) {
-        document.body.classList.toggle('dark-mode', e.matches);
-    },
-
-    handleReducedMotionChange(e) {
-        document.body.classList.toggle('reduced-motion', e.matches);
-    },
-
-    setupSmoothScrolling() {
-        const navLinks = document.querySelectorAll('nav a, .fixed-bar a, .service-category-toggle a');
-        
-        navLinks.forEach(link => {
-            EventManager.add(link, 'click', (e) => {
-                const href = link.getAttribute('href');
-                
-                if (href && href.startsWith('#')) {
-                    e.preventDefault();
-                    const targetId = href.substring(1);
-                    const targetSection = document.getElementById(targetId);
-                    
-                    if (targetSection) {
-                        targetSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                }
-            });
-        });
-    }
-};
-
 // AnimationController
 const AnimationController = {
     init() {
-// Continuación de AnimationController
+        this.setupScrollAnimations();
+        this.setupHoverEffects();
+        this.setupEntryAnimations();
+    },
+
     setupScrollAnimations() {
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
             console.warn('GSAP or ScrollTrigger not loaded');
@@ -1296,22 +1327,6 @@ const AnimationController = {
                 ease: "power2.out"
             });
         });
-
-        // Animaciones para la galería
-        gsap.utils.toArray('.gallery-item').forEach((item, i) => {
-            gsap.from(item, {
-                scrollTrigger: {
-                    trigger: item,
-                    start: "top bottom-=50",
-                    toggleActions: "play none none reverse"
-                },
-                scale: 0.8,
-                opacity: 0,
-                duration: 0.5,
-                delay: i * 0.1,
-                ease: "back.out(1.7)"
-            });
-        });
     },
 
     setupHoverEffects() {
@@ -1321,6 +1336,7 @@ const AnimationController = {
             button.addEventListener('mouseenter', () => {
                 gsap.to(button, {
                     y: -2,
+                    scale: 1.05,
                     duration: 0.2,
                     ease: "power2.out"
                 });
@@ -1329,9 +1345,28 @@ const AnimationController = {
             button.addEventListener('mouseleave', () => {
                 gsap.to(button, {
                     y: 0,
+                    scale: 1,
                     duration: 0.2,
                     ease: "power2.out"
                 });
+            });
+        });
+    },
+
+    setupEntryAnimations() {
+        // Animaciones de entrada para los elementos visibles
+        gsap.utils.toArray('.animate-entry').forEach((element, index) => {
+            gsap.from(element, {
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top bottom-=50",
+                    toggleActions: "play none none reverse"
+                },
+                opacity: 0,
+                y: 30,
+                duration: 0.6,
+                delay: index * 0.1,
+                ease: "power2.out"
             });
         });
     }
@@ -1402,141 +1437,3 @@ const FilterController = {
         });
     }
 };
-
-// App Initialization and Exports
-const App = {
-    async init() {
-        if (AppState.initialized) {
-            console.warn('App already initialized');
-            return;
-        }
-
-        try {
-            console.log('Initializing application...');
-            
-            // Initialize core functionality
-            ResponsiveController.init();
-            await ServicesController.loadServices();
-            PopupController.init();
-            GalleryController.init();
-            await CarouselController.loadCarouselContent();
-            await CarouselController.loadPaqcarrContent();
-            
-            // Initialize additional features
-            FilterController.init();
-            AnimationController.init();
-            
-            // Setup global listeners
-            this.setupGlobalEventListeners();
-            this.setupLazyLoading();
-            
-            AppState.initialized = true;
-            console.log('Application initialized successfully');
-        } catch (error) {
-            console.error('Error during initialization:', error);
-            this.handleInitializationError(error);
-        }
-    },
-
-    setupGlobalEventListeners() {
-        document.querySelectorAll('img').forEach(img => {
-            EventManager.add(img, 'error', () => ImageManager.handleImageError(img));
-        });
-
-        EventManager.add(document, 'keydown', (e) => {
-            if (e.key === 'Escape') {
-                const popup = DOMManager.getElement('popup');
-                const imageModal = DOMManager.getElement('imageModal');
-                if (popup) popup.style.display = 'none';
-                if (imageModal) imageModal.style.display = 'none';
-            }
-        });
-
-        window.addEventListener('load', () => {
-            document.body.classList.add('loaded');
-            if (location.hash) {
-                const targetElement = document.querySelector(location.hash);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        });
-
-        window.addEventListener('resize', Utils.debounce(() => {
-            ResponsiveController.handleResize();
-        }, 250));
-    },
-
-    setupLazyLoading() {
-        const imageObserver = new IntersectionObserver(
-            (entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        if (img.dataset.src) {
-                            img.src = img.dataset.src;
-                            img.removeAttribute('data-src');
-                        }
-                        observer.unobserve(img);
-                    }
-                });
-            },
-            { rootMargin: '50px' }
-        );
-
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            imageObserver.observe(img);
-        });
-    },
-
-    handleInitializationError(error) {
-        ErrorHandler.log(error, 'App initialization');
-        const mainContainer = DOMManager.getElement('main');
-        if (mainContainer) {
-            mainContainer.innerHTML = `
-                <div class="error-container">
-                    <h2>Lo sentimos, ha ocurrido un error</h2>
-                    <p>Por favor, intente recargar la página</p>
-                    <button onclick="location.reload()">Recargar página</button>
-                </div>
-            `;
-        }
-    },
-
-    cleanup() {
-        EventManager.removeAll();
-        AppState.initialized = false;
-        console.log('Application cleanup completed');
-    }
-};
-
-// Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => App.init());
-
-// Cleanup on page unload
-window.addEventListener('unload', () => App.cleanup());
-
-// Export to window object
-Object.assign(window, {
-    App,
-    ServicesController,
-    UIController,
-    PopupController,
-    CarouselController,
-    GalleryController,
-    FilterController,
-    AnimationController,
-    ResponsiveController,
-    CacheManager,
-    Utils,
-    ErrorHandler,
-    TemplateManager,
-    AnalyticsManager,
-    PerformanceMonitor,
-    ServiceWorkerManager,
-    CONFIG,
-    AppState,
-    EventManager,
-    ImageManager,
-    DOMManager
-});
