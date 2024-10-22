@@ -1,9 +1,16 @@
+// ==========================================
+// CONFIGURACIÓN BASE Y GESTORES PRINCIPALES
+// ==========================================
+
 // Configuración global
 const CONFIG = {
     BASE_URL: "https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/",
     CAROUSEL_IMAGE_BASE_URL: "https://raw.githubusercontent.com/elitemassagemx/prueba/main/carruimg/",
     DEFAULT_ERROR_IMAGE: "https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/error.webp",
-    WHATSAPP_NUMBER: "5215640020305"
+    WHATSAPP_NUMBER: "5215640020305",
+    ANIMATION_DURATION: 300,
+    CACHE_DURATION: 3600000, // 1 hora
+    DEBUG: true
 };
 
 // Gestor de estado de la aplicación
@@ -13,7 +20,11 @@ const AppState = {
     eventListeners: new Map(),
     initialized: false,
     currentCategory: 'masajes',
-    isSecondCategory: false
+    isSecondCategory: false,
+    activeBenefit: 'all',
+    loading: false,
+    error: null,
+    cache: new Map()
 };
 
 // Gestor de eventos
@@ -23,9 +34,7 @@ const EventManager = {
             console.error('Cannot add event listener to null element');
             return;
         }
-
         element.addEventListener(event, handler, options);
-        
         const key = `${element.id || 'anonymous'}-${event}`;
         AppState.eventListeners.set(key, { element, event, handler });
     },
@@ -33,7 +42,6 @@ const EventManager = {
     remove(element, event) {
         const key = `${element.id || 'anonymous'}-${event}`;
         const listener = AppState.eventListeners.get(key);
-        
         if (listener) {
             listener.element.removeEventListener(listener.event, listener.handler);
             AppState.eventListeners.delete(key);
@@ -72,6 +80,10 @@ const ImageManager = {
     buildImageUrl(iconPath) {
         if (!iconPath) return '';
         return iconPath.startsWith('http') ? iconPath : `${CONFIG.BASE_URL}${iconPath}`;
+    },
+
+    preloadImages(urls) {
+        return Promise.all(urls.map(url => this.loadImage(url)));
     }
 };
 
@@ -79,7 +91,7 @@ const ImageManager = {
 const DOMManager = {
     getElement(id) {
         const element = document.getElementById(id);
-        if (!element) {
+        if (!element && CONFIG.DEBUG) {
             console.error(`Element with id "${id}" not found`);
         }
         return element;
@@ -98,8 +110,124 @@ const DOMManager = {
         });
         children.forEach(child => element.appendChild(child));
         return element;
+    },
+
+    removeElement(element) {
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    },
+
+    clearContainer(container) {
+        if (container) {
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+        }
+    },
+
+    setVisible(element, visible) {
+        if (element) {
+            element.style.display = visible ? 'block' : 'none';
+        }
+    },
+
+    addClass(element, className) {
+        element?.classList.add(className);
+    },
+
+    removeClass(element, className) {
+        element?.classList.remove(className);
+    },
+
+    toggleClass(element, className, force) {
+        element?.classList.toggle(className, force);
     }
 };
+
+// Sistema de Caché
+const CacheManager = {
+    cache: new Map(),
+    
+    set(key, value, ttl = CONFIG.CACHE_DURATION) {
+        const item = {
+            value,
+            expiry: Date.now() + ttl
+        };
+        this.cache.set(key, item);
+    },
+
+    get(key) {
+        const item = this.cache.get(key);
+        if (!item) return null;
+        
+        if (Date.now() > item.expiry) {
+            this.cache.delete(key);
+            return null;
+        }
+        
+        return item.value;
+    },
+
+    clear() {
+        this.cache.clear();
+    },
+
+    remove(key) {
+        this.cache.delete(key);
+    }
+};
+
+// Gestor de Errores
+const ErrorHandler = {
+    errors: [],
+    
+    log(error, context = '') {
+        const errorInfo = {
+            error,
+            context,
+            timestamp: new Date(),
+            stack: error.stack
+        };
+        
+        this.errors.push(errorInfo);
+        if (CONFIG.DEBUG) {
+            console.error(`Error in ${context}:`, error);
+        }
+        
+        return errorInfo;
+    },
+
+    getLastError() {
+        return this.errors[this.errors.length - 1];
+    },
+
+    clearErrors() {
+        this.errors = [];
+    },
+
+    showErrorMessage(message, container) {
+        const errorDiv = DOMManager.createElement('div', {
+            className: 'error-message'
+        });
+        errorDiv.textContent = message;
+        container.appendChild(errorDiv);
+        
+        setTimeout(() => DOMManager.removeElement(errorDiv), 5000);
+    },
+
+    handleApiError(error) {
+        this.log(error, 'API Error');
+        return {
+            success: false,
+            error: error.message || 'Se produjo un error desconocido'
+        };
+    }
+};
+
+// ==========================================
+// CONTROLADORES PRINCIPALES
+// ==========================================
 
 // Controlador de servicios
 const ServicesController = {
@@ -119,18 +247,10 @@ const ServicesController = {
             this.renderInitialServices();
             return true;
         } catch (error) {
-            console.error('Error loading services:', error);
+            ErrorHandler.log(error, 'Loading services');
             this.handleServiceLoadError();
             return false;
         }
-    },
-
-    renderInitialServices() {
-        this.renderServices('masajes');
-        this.renderPackages();
-        UIController.setupFilters();
-        this.setupServiceCategories();
-        this.setupPackageNav();
     },
 
     handleServiceLoadError() {
@@ -142,106 +262,148 @@ const ServicesController = {
         if (packageList) packageList.innerHTML = errorMessage;
     },
 
+    renderInitialServices() {
+        this.renderServices(AppState.currentCategory);
+        UIController.setupFilters();
+        this.setupServiceCategories();
+    },
+
     renderServices(category) {
-        console.log(`Rendering services for category: ${category}`);
-        const servicesList = DOMManager.getElement('services-list');
-        const template = DOMManager.getElement('service-template');
-        
-        if (!servicesList || !template) {
-            console.error('Required elements not found');
-            return;
-        }
+        const servicesList = DOMManager.getElement('services-grid');
+        if (!servicesList) return;
 
         servicesList.innerHTML = '';
+        const services = AppState.services[category];
 
-        if (!Array.isArray(AppState.services[category])) {
+        if (!Array.isArray(services)) {
             console.error(`Invalid services data for category: ${category}`);
             servicesList.innerHTML = '<p>Error al cargar los servicios.</p>';
             return;
         }
 
-        AppState.services[category].forEach((service, index) => {
-            const serviceElement = template.content.cloneNode(true);
-            this.configureServiceElement(serviceElement, service, index);
+        services.forEach((service, index) => {
+            const serviceElement = this.createServiceElement(service, index);
             servicesList.appendChild(serviceElement);
         });
+
+        if (AppState.activeBenefit !== 'all') {
+            this.filterServicesByBenefit(AppState.activeBenefit);
+        }
     },
 
-    configureServiceElement(element, service, index) {
-        const titleElement = element.querySelector('.service-title');
-        const serviceIcon = element.querySelector('.service-icon');
-        const descriptionElement = element.querySelector('.service-description');
-        const benefitsContainer = element.querySelector('.benefits-container');
-        const durationIcon = element.querySelector('.duration-icon');
-        const durationElement = element.querySelector('.service-duration');
+    createServiceElement(service, index) {
+        const element = DOMManager.createElement('div');
+        const benefitClasses = service.benefits ? 
+            service.benefits.map(b => b.toLowerCase().replace(/\s+/g, '-')).join(' ') : '';
+        
+        element.className = `service-item ${benefitClasses}`;
+        
+        element.innerHTML = `
+            <div class="service-background" style="background-image: url(${ImageManager.buildImageUrl(service.backgroundImage)})"></div>
+            <div class="service-content">
+                <div class="service-header">
+                    <img src="${ImageManager.buildImageUrl(service.icon)}" alt="" class="service-icon">
+                    <h3 class="service-title">${service.title}</h3>
+                </div>
+                <p class="service-description">${service.description}</p>
+                ${this.renderBenefits(service)}
+                <div class="duration-container">
+                    <img src="${ImageManager.buildImageUrl('duration-icon.webp')}" alt="" class="duration-icon">
+                    <span class="service-duration">${service.duration}</span>
+                </div>
+                <button class="saber-mas-button">Saber más</button>
+            </div>
+        `;
+
         const saberMasButton = element.querySelector('.saber-mas-button');
-        const serviceItem = element.querySelector('.service-item');
-        const serviceBackground = element.querySelector('.service-background');
-
-        if (titleElement) titleElement.textContent = service.title || 'Sin título';
-        
-        if (serviceIcon && service.icon) {
-            serviceIcon.src = ImageManager.buildImageUrl(service.icon);
-            serviceIcon.onerror = () => ImageManager.handleImageError(serviceIcon);
-        }
-        
-        if (descriptionElement) {
-            descriptionElement.textContent = service.description || 'Sin descripción';
-        }
-
-        this.configureBenefits(benefitsContainer, service);
-
-        if (durationIcon && service.durationIcon) {
-            durationIcon.src = ImageManager.buildImageUrl(service.durationIcon);
-            durationIcon.onerror = () => ImageManager.handleImageError(durationIcon);
-        }
-
-        if (durationElement) {
-            durationElement.textContent = service.duration || 'Duración no especificada';
-        }
-
         if (saberMasButton) {
-            saberMasButton.addEventListener('click', (e) => {
-                e.stopPropagation();
+            EventManager.add(saberMasButton, 'click', () => {
                 PopupController.showPopup(service, index);
             });
         }
 
-        if (serviceItem && Array.isArray(service.benefits)) {
-            service.benefits.forEach(benefit => {
-                serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
-            });
-        }
-
-        if (serviceBackground && service.backgroundImage) {
-            serviceBackground.style.backgroundImage = 
-                `url(${ImageManager.buildImageUrl(service.backgroundImage)})`;
-        }
+        return element;
     },
 
-    configureBenefits(container, service) {
-        if (!container || !Array.isArray(service.benefitsIcons)) return;
+    renderBenefits(service) {
+        if (!Array.isArray(service.benefits) || !Array.isArray(service.benefitsIcons)) {
+            return '';
+        }
 
-        service.benefitsIcons.forEach((iconUrl, index) => {
-            const benefitItem = DOMManager.createElement('div', { className: 'benefit-item' });
-            
-            const img = DOMManager.createElement('img', {
-                src: ImageManager.buildImageUrl(iconUrl),
-                alt: 'Benefit icon',
-                className: 'benefit-icon',
-                style: 'width: 24px; height: 24px'
-            });
-            
-            img.onerror = () => ImageManager.handleImageError(img);
-            
-            const span = DOMManager.createElement('span', {
-                textContent: service.benefits[index] || ''
-            });
-            
-            benefitItem.appendChild(img);
-            benefitItem.appendChild(span);
-            container.appendChild(benefitItem);
+        return `
+            <div class="benefits-container">
+                ${service.benefits.map((benefit, index) => `
+                    <div class="benefit-item">
+                        <img src="${ImageManager.buildImageUrl(service.benefitsIcons[index])}" 
+                             alt="${benefit}" 
+                             class="benefit-icon">
+                        <span>${benefit}</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    },
+
+    filterServicesByBenefit(benefit) {
+        const services = document.querySelectorAll('.service-item');
+        services.forEach(service => {
+            if (benefit === 'all') {
+                service.style.display = 'block';
+            } else {
+                const hasFilter = service.classList.contains(benefit);
+                service.style.display = hasFilter ? 'block' : 'none';
+            }
         });
+    },
+
+    setupServiceCategories() {
+        const categoryGroups = document.querySelectorAll('.service-category-toggle');
+        
+        categoryGroups.forEach((group, groupIndex) => {
+            const inputs = group.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                EventManager.add(input, 'change', () => {
+                    const category = input.value;
+                    AppState.currentCategory = category;
+                    AppState.isSecondCategory = groupIndex === 1;
+                    
+                    this.renderServices(category);
+                    UIController.setupBenefitsNav(category);
+
+                    // Sincronizar los radio buttons entre grupos
+                    const otherGroup = groupIndex === 0 ? categoryGroups[1] : categoryGroups[0];
+                    const correspondingInput = otherGroup.querySelector(`input[value="${category}"]`);
+                    if (correspondingInput) {
+                        correspondingInput.checked = true;
+                    }
+                });
+            });
+        });
+
+        // Configuración inicial
+        UIController.setupBenefitsNav('masajes');
+    },
+
+    setupPackageNav() {
+        const packageNav = document.querySelector('.package-nav');
+        if (!packageNav) return;
+
+        packageNav.innerHTML = '';
+        const allPackages = new Set();
+        const packageIcons = new Map();
+
+        if (AppState.services.paquetes) {
+            AppState.services.paquetes.forEach(pkg => {
+                if (pkg.type) {
+                    allPackages.add(pkg.type);
+                    if (pkg.icon) {
+                        packageIcons.set(pkg.type, pkg.icon);
+                    }
+                }
+            });
+        }
+
+        UIController.createFilterButtons(packageNav, Array.from(allPackages), 'package', packageIcons);
     },
 
     renderPackages() {
@@ -307,73 +469,118 @@ const ServicesController = {
         }
     },
 
-    setupServiceCategories() {
-        // Manejar ambos grupos de radio buttons
-        const categoryGroups = document.querySelectorAll('.service-category-toggle');
-        
-        categoryGroups.forEach((group, groupIndex) => {
-            const inputs = group.querySelectorAll('input[type="radio"]');
-            inputs.forEach(input => {
-                EventManager.add(input, 'change', () => {
-                    const category = input.value;
-                    AppState.currentCategory = category;
-                    AppState.isSecondCategory = groupIndex === 1;
-                    
-                    // Actualizar la sección correspondiente
-                    if (category === 'paquetes') {
-                        this.renderPackages();
-                    } else {
-                        this.renderServices(category);
-                    }
-                    
-                    // Actualizar navegación
-                    UIController.setupBenefitsNav(category);
-                    this.setupPackageNav();
+    configureBenefits(container, service) {
+        if (!container || !Array.isArray(service.benefitsIcons)) return;
 
-                    // Sincronizar los radio buttons entre grupos
-                    const otherGroup = groupIndex === 0 ? categoryGroups[1] : categoryGroups[0];
-                    const correspondingInput = otherGroup.querySelector(`input[value="${category}"]`);
-                    if (correspondingInput) {
-                        correspondingInput.checked = true;
-                    }
-                });
+        service.benefitsIcons.forEach((iconUrl, index) => {
+            const benefitItem = DOMManager.createElement('div', { 
+                className: 'benefit-item'
             });
+            
+            const img = DOMManager.createElement('img', {
+                src: ImageManager.buildImageUrl(iconUrl),
+                alt: service.benefits[index] || 'Benefit icon',
+                className: 'benefit-icon'
+            });
+            
+            const span = DOMManager.createElement('span', {
+                textContent: service.benefits[index] || ''
+            });
+            
+            benefitItem.appendChild(img);
+            benefitItem.appendChild(span);
+            container.appendChild(benefitItem);
         });
-
-        // Configuración inicial
-        UIController.setupBenefitsNav('masajes');
-        this.setupPackageNav();
-    },
-
-    setupPackageNav() {
-        const packageNav = document.querySelector('.package-nav');
-        if (!packageNav) return;
-
-        packageNav.innerHTML = '';
-        const allPackages = new Set();
-        const packageIcons = new Map();
-
-        if (AppState.services.paquetes) {
-            AppState.services.paquetes.forEach(pkg => {
-                if (pkg.type) {
-                    allPackages.add(pkg.type);
-                    // Guardar el ícono correspondiente si existe
-                    if (pkg.icon) {
-                        packageIcons.set(pkg.type, pkg.icon);
-                    }
-                }
-            });
-        }
-
-        UIController.createFilterButtons(packageNav, Array.from(allPackages), 'package', packageIcons);
     }
 };
+
+
+// ==========================================
+// CONTROLADORES DE UI Y POPUP
+// ==========================================
 
 // Controlador de UI
 const UIController = {
     setupFilters() {
+        this.setupBenefitsNav(AppState.currentCategory);
         this.setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
         this.setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    },
+
+    setupBenefitsNav(category) {
+        const benefitsNav = document.querySelector('.benefits-nav');
+        if (!benefitsNav) return;
+
+        benefitsNav.innerHTML = '';
+        const allBenefits = new Set();
+        const benefitIcons = new Map();
+
+        if (AppState.services[category]) {
+            AppState.services[category].forEach(service => {
+                if (Array.isArray(service.benefits) && Array.isArray(service.benefitsIcons)) {
+                    service.benefits.forEach((benefit, index) => {
+                        if (!allBenefits.has(benefit)) {
+                            allBenefits.add(benefit);
+                            benefitIcons.set(benefit, service.benefitsIcons[index]);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Crear botón "Todos"
+        const allButton = this.createBenefitButton('Todos', 'todos.webp', 'all');
+        benefitsNav.appendChild(allButton);
+
+        // Crear botones para cada beneficio
+        Array.from(allBenefits).forEach(benefit => {
+            const button = this.createBenefitButton(
+                this.getShortBenefitText(benefit),
+                benefitIcons.get(benefit),
+                benefit.toLowerCase().replace(/\s+/g, '-')
+            );
+            benefitsNav.appendChild(button);
+        });
+    },
+
+    createBenefitButton(text, iconUrl, filter) {
+        const button = DOMManager.createElement('button', {
+            className: `benefit-btn ${filter === 'all' ? 'active' : ''}`,
+            'data-filter': filter
+        });
+
+        button.innerHTML = `
+            <img src="${ImageManager.buildImageUrl(iconUrl)}" alt="${text}">
+            <span class="visible-text">${text}</span>
+            <span class="hidden-text">${filter}</span>
+        `;
+
+        EventManager.add(button, 'click', () => {
+            document.querySelectorAll('.benefit-btn').forEach(btn => 
+                btn.classList.remove('active'));
+            button.classList.add('active');
+            AppState.activeBenefit = filter;
+            ServicesController.filterServicesByBenefit(filter);
+        });
+
+        return button;
+    },
+
+    getShortBenefitText(text) {
+        const shortTexts = {
+            "Relajación Profunda": "Relax",
+            "Alivio de Tensiones": "Alivio",
+            "Mejora Circulación": "Circula",
+            "Hidratará tu Piel": "Hidrata",
+            "Multisensorial": "Sentidos",
+            "Mejorarás tu Equilibrio": "Balance",
+            "Reducirás el Estrés": "Anti-estrés",
+            "Aumento de Energía": "Energía",
+            "Alivio Dolor Muscular": "No dolor",
+            "Reduce Ansiedad": "Calma",
+            "Calma Profunda": "Sereno"
+        };
+        return shortTexts[text] || text;
     },
 
     setupFilterButtons(navSelector, listSelector, itemSelector) {
@@ -398,30 +605,6 @@ const UIController = {
         });
     },
 
-    setupBenefitsNav(category) {
-        const benefitsNav = document.querySelector('.benefits-nav');
-        if (!benefitsNav) return;
-
-        benefitsNav.innerHTML = '';
-        const allBenefits = new Set();
-        const benefitIcons = new Map();
-
-        if (AppState.services[category]) {
-            AppState.services[category].forEach(service => {
-                if (Array.isArray(service.benefits) && Array.isArray(service.benefitsIcons)) {
-                    service.benefits.forEach((benefit, index) => {
-                        if (!allBenefits.has(benefit)) {
-                            allBenefits.add(benefit);
-                            benefitIcons.set(benefit, service.benefitsIcons[index]);
-                        }
-                    });
-                }
-            });
-        }
-
-        this.createFilterButtons(benefitsNav, Array.from(allBenefits), 'benefit', benefitIcons);
-    },
-
     createFilterButtons(container, items, type, iconsMap = new Map()) {
         // Crear botón "Todos"
         const allButton = DOMManager.createElement('button', {
@@ -429,7 +612,7 @@ const UIController = {
             'data-filter': 'all'
         });
 
-allButton.innerHTML = `
+        allButton.innerHTML = `
             <img src="${CONFIG.BASE_URL}todos.webp" alt="Todos" class="filter-icon">
             <span class="visible-text">Todos</span>
             <span class="hidden-text">all</span>
@@ -445,7 +628,7 @@ allButton.innerHTML = `
 
             const iconUrl = iconsMap.get(item) || 
                 `${CONFIG.BASE_URL}${item.toLowerCase().replace(/\s+/g, '-')}.webp`;
-            const alternativeText = this.getAlternativeText(item);
+            const alternativeText = this.getShortBenefitText(item);
             
             button.innerHTML = `
                 <img src="${ImageManager.buildImageUrl(iconUrl)}" alt="${item}" class="filter-icon">
@@ -454,34 +637,10 @@ allButton.innerHTML = `
             `;
             container.appendChild(button);
         });
-    },
-
-    getAlternativeText(text) {
-        const alternativeTexts = {
-            "Bajará tu Estrés": "Relax",
-            "Cambiará tu Ánimo": "Ánimo",
-            "Aliviarás Tensiones": "Alivio",
-            "Aliviarás Dolores Musculares": "Músculos",
-            "Mejorarás tu Circulación": "Circula",
-            "Relajación Profunda": "Profundo",
-            "Relajación": "Relax",
-            "Alivio de Dolores en Espalda y Cuello": "Espalda",
-            "Relajación Total": "Total",
-            "Mejora Circulación Sanguínea": "Sangre",
-            "Hidratará tu Piel": "Hidrata",
-            "Multisensorial": "Sentidos",
-            "Mejorarás tu Equilibrio": "Balance",
-            "Reducirás el Estrés": "Anti-estrés",
-            "Aumento de Energía": "Energía",
-            "Alivio Dolor Muscular": "No dolor",
-            "Reduce Ansiedad": "Calma",
-            "Calma Profunda": "Sereno"
-        };
-        return alternativeTexts[text] || text;
     }
 };
 
-// Controlador de Popup
+// PopupController
 const PopupController = {
     init() {
         const popup = DOMManager.getElement('popup');
@@ -498,6 +657,19 @@ const PopupController = {
             if (event.target === popup) {
                 console.log('Closing popup (clicked outside)');
                 popup.style.display = 'none';
+            }
+        });
+
+        // Navegación con teclado
+        EventManager.add(window, 'keydown', (e) => {
+            if (popup.style.display === 'block') {
+                if (e.key === 'Escape') {
+                    popup.style.display = 'none';
+                } else if (e.key === 'ArrowRight') {
+                    this.navigatePopup(1);
+                } else if (e.key === 'ArrowLeft') {
+                    this.navigatePopup(-1);
+                }
             }
         });
 
@@ -624,27 +796,192 @@ const PopupController = {
         });
     },
 
-    navigatePopup(direction, isPackage = false) {
-        const items = isPackage ? AppState.services.paquetes : AppState.services[AppState.currentCategory];
+    navigatePopup(direction) {
+        const category = AppState.currentCategory;
+        const items = AppState.services[category];
+        if (!items) return;
+
         AppState.currentPopupIndex = 
             (AppState.currentPopupIndex + direction + items.length) % items.length;
-        this.showPopup(items[AppState.currentPopupIndex], AppState.currentPopupIndex, isPackage);
+        
+        this.showPopup(
+            items[AppState.currentPopupIndex], 
+            AppState.currentPopupIndex, 
+            category === 'paquetes'
+        );
     },
 
     sendWhatsAppMessage(action, serviceTitle) {
-        console.log(`Sending WhatsApp message for: ${action} - ${serviceTitle}`);
         const message = encodeURIComponent(`Hola! Quiero ${action} un ${serviceTitle}`);
         const url = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${message}`;
         window.open(url, '_blank');
     }
 };
 
-// Controlador de Galería
+// ==========================================
+// CONTROLADORES DE CARRUSEL Y GALERÍA
+// ==========================================
+
+// CarouselController
+const CarouselController = {
+    async loadCarouselContent() {
+        try {
+            const response = await fetch('carrusel.html');
+            const data = await response.text();
+            const container = DOMManager.getElement('carrusel-container');
+            if (container) {
+                container.innerHTML = data;
+                setTimeout(() => this.initCarousel(), 500);
+            }
+        } catch (error) {
+            console.error('Error loading carousel:', error);
+        }
+    },
+
+    async loadPaqcarrContent() {
+        try {
+            const response = await fetch('paqcarr.html');
+            const data = await response.text();
+            const container = DOMManager.getElement('paqcarr-container');
+            if (container) {
+                container.innerHTML = data;
+                this.initPaqcarr();
+            }
+        } catch (error) {
+            console.error('Error loading paqcarr:', error);
+        }
+    },
+
+    initCarousel() {
+        const carousel = DOMManager.getElement('carrusel-container');
+        if (!carousel) return;
+
+        const items = carousel.querySelectorAll('.carousel-item');
+        if (items.length === 0) return;
+
+        const prevBtn = carousel.querySelector('.carousel-control.prev');
+        const nextBtn = carousel.querySelector('.carousel-control.next');
+        if (!prevBtn || !nextBtn) return;
+
+        const itemWidth = items[0].offsetWidth;
+        let currentIndex = 0;
+
+        const showSlide = (index) => {
+            const carouselList = carousel.querySelector('.carousel');
+            carouselList.style.transform = `translateX(-${index * itemWidth}px)`;
+            currentIndex = index;
+            this.updateIndicators(carousel, index);
+        };
+
+        EventManager.add(nextBtn, 'click', () => {
+            showSlide((currentIndex + 1) % items.length);
+        });
+
+        EventManager.add(prevBtn, 'click', () => {
+            showSlide((currentIndex - 1 + items.length) % items.length);
+        });
+
+        const indicators = carousel.querySelectorAll('.carousel-indicators button');
+        indicators.forEach((indicator, index) => {
+            EventManager.add(indicator, 'click', () => showSlide(index));
+        });
+
+        items.forEach(item => {
+            const img = item.querySelector('img');
+            if (img) {
+                const originalSrc = img.getAttribute('src');
+                img.src = `${CONFIG.CAROUSEL_IMAGE_BASE_URL}${originalSrc}`;
+            }
+        });
+
+        showSlide(0);
+
+        EventManager.add(carousel, 'keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                showSlide((currentIndex + 1) % items.length);
+            } else if (e.key === 'ArrowLeft') {
+                showSlide((currentIndex - 1 + items.length) % items.length);
+            }
+        });
+
+        let touchstartX = 0;
+        let touchendX = 0;
+
+        EventManager.add(carousel, 'touchstart', (e) => {
+            touchstartX = e.changedTouches[0].screenX;
+        });
+
+        EventManager.add(carousel, 'touchend', (e) => {
+            touchendX = e.changedTouches[0].screenX;
+            if (touchendX < touchstartX) {
+                showSlide((currentIndex + 1) % items.length);
+            }
+            if (touchendX > touchstartX) {
+                showSlide((currentIndex - 1 + items.length) % items.length);
+            }
+        });
+    },
+
+    initPaqcarr() {
+        const carousel = DOMManager.getElement('paqcarr-container');
+        if (!carousel) return;
+
+        const items = carousel.querySelectorAll('.image-nav-item');
+        if (items.length === 0) return;
+
+        items.forEach(item => {
+            EventManager.add(item, 'click', () => {
+                const image = item.getAttribute('data-image');
+                const title = item.getAttribute('data-title');
+                const description = item.getAttribute('data-description');
+
+                const mainImageContainer = carousel.querySelector('.main-image-container');
+                if (mainImageContainer) {
+                    const mainImage = mainImageContainer.querySelector('.main-image');
+                    if (mainImage) {
+                        mainImage.src = image;
+                        mainImage.alt = title;
+                    }
+
+                    const imageInfo = mainImageContainer.querySelector('.image-info');
+                    if (imageInfo) {
+                        imageInfo.innerHTML = `
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        `;
+                    }
+                }
+
+                items.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        if (items[0]) {
+            items[0].click();
+        }
+    },
+
+    updateIndicators(carousel, index) {
+        const indicators = carousel.querySelectorAll('.carousel-indicators button');
+        indicators.forEach((indicator, i) => {
+            if (i === index) {
+                indicator.classList.add('active');
+                indicator.setAttribute('aria-current', 'true');
+            } else {
+                indicator.classList.remove('active');
+                indicator.removeAttribute('aria-current');
+            }
+        });
+    }
+};
+
+// GalleryController
 const GalleryController = {
     init() {
         this.setupGallery();
-        this.setupGalleryAnimations();
         this.setupGalleryModal();
+        this.setupGalleryAnimations();
     },
 
     setupGallery() {
@@ -660,7 +997,7 @@ const GalleryController = {
             {
                 src: 'QUESOSAHM.webp',
                 title: 'Tabla Gourmet',
-                description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita'
+                description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino.'
             },
             {
                 src: 'choco2.webp',
@@ -720,6 +1057,21 @@ const GalleryController = {
         modal.style.display = 'block';
     },
 
+    setupGalleryModal() {
+        const modal = DOMManager.getElement('imageModal');
+        const closeBtn = modal.querySelector('.close');
+
+        EventManager.add(closeBtn, 'click', () => {
+            modal.style.display = "none";
+        });
+
+        EventManager.add(window, 'click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+    },
+
     setupGalleryAnimations() {
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
             console.warn('GSAP or ScrollTrigger not loaded');
@@ -763,188 +1115,14 @@ const GalleryController = {
                 }
             );
         });
-    },
-
-    setupGalleryModal() {
-        const modal = DOMManager.getElement('imageModal');
-        const closeBtn = modal.querySelector('.close');
-
-        EventManager.add(closeBtn, 'click', () => {
-            modal.style.display = "none";
-        });
-
-        EventManager.add(window, 'click', (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        });
     }
 };
 
-// Controlador de Carousel
-const CarouselController = {
-    async loadCarouselContent() {
-        try {
-            const response = await fetch('carrusel.html');
-            const data = await response.text();
-            const container = DOMManager.getElement('carrusel-container');
-            if (container) {
-                container.innerHTML = data;
-                setTimeout(() => this.initCarousel(), 500);
-            }
-        } catch (error) {
-            console.error('Error loading carousel:', error);
-        }
-    },
+// ==========================================
+// CONTROLADORES RESPONSIVE Y ANIMACIÓN
+// ==========================================
 
-    async loadPaqcarrContent() {
-        try {
-            const response = await fetch('paqcarr.html');
-            const data = await response.text();
-            const container = DOMManager.getElement('paqcarr-container');
-            if (container) {
-                container.innerHTML = data;
-                this.initPaqcarr();
-            }
-        } catch (error) {
-            console.error('Error loading paqcarr:', error);
-        }
-    },
-
-    initCarousel() {
-        const carousel = DOMManager.getElement('carrusel-container');
-        if (!carousel) return;
-
-        const items = carousel.querySelectorAll('.carousel-item');
-        if (items.length === 0) return;
-
-        const prevBtn = carousel.querySelector('.carousel-control.prev');
-        const nextBtn = carousel.querySelector('.carousel-control.next');
-        if (!prevBtn || !nextBtn) return;
-
-        const itemWidth = items[0].offsetWidth;
-        let currentIndex = 0;
-
-        const showSlide = (index) => {
-            const carouselList = carousel.querySelector('.carousel');
-            carouselList.style.transform = `translateX(-${index * itemWidth}px)`;
-            currentIndex = index;
-            this.updateIndicators(carousel, index);
-        };
-
-        EventManager.add(nextBtn, 'click', () => {
-            showSlide((currentIndex + 1) % items.length);
-        });
-
-        EventManager.add(prevBtn, 'click', () => {
-            showSlide((currentIndex - 1 + items.length) % items.length);
-        });
-
-        // Setup indicators
-        const indicators = carousel.querySelectorAll('.carousel-indicators button');
-        indicators.forEach((indicator, index) => {
-        EventManager.add(indicator, 'click', () => showSlide(index));
-        });
-
-        // Update image sources
-        items.forEach(item => {
-            const img = item.querySelector('img');
-            if (img) {
-                const originalSrc = img.getAttribute('src');
-                img.src = `${CONFIG.CAROUSEL_IMAGE_BASE_URL}${originalSrc}`;
-            }
-        });
-
-        // Initialize carousel
-        showSlide(0);
-
-        // Keyboard navigation
-        EventManager.add(carousel, 'keydown', (e) => {
-            if (e.key === 'ArrowRight') {
-                showSlide((currentIndex + 1) % items.length);
-            } else if (e.key === 'ArrowLeft') {
-                showSlide((currentIndex - 1 + items.length) % items.length);
-            }
-        });
-
-        // Touch navigation
-        let touchstartX = 0;
-        let touchendX = 0;
-
-        EventManager.add(carousel, 'touchstart', (e) => {
-            touchstartX = e.changedTouches[0].screenX;
-        });
-
-        EventManager.add(carousel, 'touchend', (e) => {
-            touchendX = e.changedTouches[0].screenX;
-            if (touchendX < touchstartX) {
-                showSlide((currentIndex + 1) % items.length);
-            }
-            if (touchendX > touchstartX) {
-                showSlide((currentIndex - 1 + items.length) % items.length);
-            }
-        });
-    },
-
-    initPaqcarr() {
-        const carousel = DOMManager.getElement('paqcarr-container');
-        if (!carousel) return;
-
-        const items = carousel.querySelectorAll('.image-nav-item');
-        if (items.length === 0) return;
-
-        // Configurar el carrusel de paquetes
-        items.forEach(item => {
-            EventManager.add(item, 'click', () => {
-                const image = item.getAttribute('data-image');
-                const title = item.getAttribute('data-title');
-                const description = item.getAttribute('data-description');
-
-                // Actualizar imagen principal
-                const mainImageContainer = carousel.querySelector('.main-image-container');
-                if (mainImageContainer) {
-                    const mainImage = mainImageContainer.querySelector('.main-image');
-                    if (mainImage) {
-                        mainImage.src = image;
-                        mainImage.alt = title;
-                    }
-
-                    const imageInfo = mainImageContainer.querySelector('.image-info');
-                    if (imageInfo) {
-                        imageInfo.innerHTML = `
-                            <h3>${title}</h3>
-                            <p>${description}</p>
-                        `;
-                    }
-                }
-
-                // Actualizar estado activo
-                items.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-            });
-        });
-
-        // Activar el primer item por defecto
-        if (items[0]) {
-            items[0].click();
-        }
-    },
-
-    updateIndicators(carousel, index) {
-        const indicators = carousel.querySelectorAll('.carousel-indicators button');
-        indicators.forEach((indicator, i) => {
-            if (i === index) {
-                indicator.classList.add('active');
-                indicator.setAttribute('aria-current', 'true');
-            } else {
-                indicator.classList.remove('active');
-                indicator.removeAttribute('aria-current');
-            }
-        });
-    }
-};
-
-// Controlador de navegación responsive
+// ResponsiveController
 const ResponsiveController = {
     init() {
         this.setupResponsiveNavigation();
@@ -952,30 +1130,6 @@ const ResponsiveController = {
         this.setupResizeHandling();
         this.initializeMediaQueries();
         this.setupSmoothScrolling();
-    },
-
-    setupSmoothScrolling() {
-        const navLinks = document.querySelectorAll('nav a, .fixed-bar a, .service-category-toggle a');
-        
-        navLinks.forEach(link => {
-            EventManager.add(link, 'click', (e) => {
-                const href = link.getAttribute('href');
-                
-                // Si es un enlace interno
-                if (href && href.startsWith('#')) {
-                    e.preventDefault();
-                    const targetId = href.substring(1);
-                    const targetSection = document.getElementById(targetId);
-                    
-                    if (targetSection) {
-                        targetSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                }
-            });
-        });
     },
 
     setupResponsiveNavigation() {
@@ -1003,13 +1157,11 @@ const ResponsiveController = {
         EventManager.add(window, 'scroll', () => {
             const currentScroll = window.pageYOffset;
             
-            // Header visibility
             if (header) {
                 header.classList.toggle('scrolled', currentScroll > 100);
                 header.classList.toggle('header-hidden', currentScroll > lastScroll && currentScroll > 200);
             }
 
-            // Fixed bar visibility
             if (fixedBar) {
                 fixedBar.classList.toggle('bar-hidden', currentScroll < lastScroll);
             }
@@ -1029,7 +1181,7 @@ const ResponsiveController = {
         };
 
         EventManager.add(window, 'resize', handleResize);
-        handleResize(); // Initial call
+        handleResize();
     },
 
     adjustLayoutForScreenSize(width) {
@@ -1047,12 +1199,6 @@ const ResponsiveController = {
         document.documentElement.style.setProperty('--heading-font-size', '1.5rem');
         document.documentElement.style.setProperty('--container-padding', '10px');
         document.documentElement.style.setProperty('--section-spacing', '30px');
-        
-        const grids = document.querySelectorAll('.services-grid, .gallery-grid, .package-grid');
-        grids.forEach(grid => {
-            grid.style.gridTemplateColumns = '1fr';
-            grid.style.gap = '15px';
-        });
     },
 
     optimizeForTablet() {
@@ -1070,12 +1216,10 @@ const ResponsiveController = {
     },
 
     initializeMediaQueries() {
-        // Observar cambios en el modo oscuro
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        darkModeMediaQuery.addListener(e => this.handleDarkModeChange(e));
-        
-        // Observar cambios en la preferencia de movimiento reducido
         const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        
+        darkModeMediaQuery.addListener(e => this.handleDarkModeChange(e));
         reducedMotionMediaQuery.addListener(e => this.handleReducedMotionChange(e));
     },
 
@@ -1085,10 +1229,181 @@ const ResponsiveController = {
 
     handleReducedMotionChange(e) {
         document.body.classList.toggle('reduced-motion', e.matches);
+    },
+
+    setupSmoothScrolling() {
+        const navLinks = document.querySelectorAll('nav a, .fixed-bar a, .service-category-toggle a');
+        
+        navLinks.forEach(link => {
+            EventManager.add(link, 'click', (e) => {
+                const href = link.getAttribute('href');
+                
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
     }
 };
 
-// Inicialización de la aplicación
+// AnimationController
+const AnimationController = {
+    init() {
+// Continuación de AnimationController
+    setupScrollAnimations() {
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+            console.warn('GSAP or ScrollTrigger not loaded');
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Animaciones para los servicios
+        gsap.utils.toArray('.service-item').forEach(service => {
+            gsap.from(service, {
+                scrollTrigger: {
+                    trigger: service,
+                    start: "top bottom-=100",
+                    toggleActions: "play none none reverse"
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.6,
+                ease: "power2.out"
+            });
+        });
+
+        // Animaciones para los beneficios
+        gsap.utils.toArray('.benefit-btn').forEach((btn, i) => {
+            gsap.from(btn, {
+                scrollTrigger: {
+                    trigger: btn,
+                    start: "top bottom"
+                },
+                opacity: 0,
+                y: 20,
+                duration: 0.4,
+                delay: i * 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        // Animaciones para la galería
+        gsap.utils.toArray('.gallery-item').forEach((item, i) => {
+            gsap.from(item, {
+                scrollTrigger: {
+                    trigger: item,
+                    start: "top bottom-=50",
+                    toggleActions: "play none none reverse"
+                },
+                scale: 0.8,
+                opacity: 0,
+                duration: 0.5,
+                delay: i * 0.1,
+                ease: "back.out(1.7)"
+            });
+        });
+    },
+
+    setupHoverEffects() {
+        const buttons = document.querySelectorAll('.benefit-btn, .package-btn');
+        
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                gsap.to(button, {
+                    y: -2,
+                    duration: 0.2,
+                    ease: "power2.out"
+                });
+            });
+
+            button.addEventListener('mouseleave', () => {
+                gsap.to(button, {
+                    y: 0,
+                    duration: 0.2,
+                    ease: "power2.out"
+                });
+            });
+        });
+    }
+};
+
+// FilterController
+const FilterController = {
+    init() {
+        this.setupCategoryFilters();
+        this.setupBenefitFilters();
+        this.setupPackageFilters();
+    },
+
+    setupCategoryFilters() {
+        const categoryToggles = document.querySelectorAll('.service-category-toggle');
+        categoryToggles.forEach(toggle => {
+            const inputs = toggle.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                EventManager.add(input, 'change', () => {
+                    const category = input.value;
+                    this.changeCategory(category);
+                });
+            });
+        });
+    },
+
+    setupBenefitFilters() {
+        const benefitButtons = document.querySelectorAll('.benefit-btn');
+        benefitButtons.forEach(button => {
+            EventManager.add(button, 'click', () => {
+                const filter = button.getAttribute('data-filter');
+                this.filterByBenefit(filter);
+            });
+        });
+    },
+
+    setupPackageFilters() {
+        const packageButtons = document.querySelectorAll('.package-btn');
+        packageButtons.forEach(button => {
+            EventManager.add(button, 'click', () => {
+                const filter = button.getAttribute('data-filter');
+                this.filterByPackageType(filter);
+            });
+        });
+    },
+
+    changeCategory(category) {
+        AppState.currentCategory = category;
+        ServicesController.renderServices(category);
+        UIController.setupBenefitsNav(category);
+    },
+
+    filterByBenefit(benefit) {
+        const items = document.querySelectorAll('.service-item');
+        this.applyFilter(items, benefit);
+    },
+
+    filterByPackageType(type) {
+        const items = document.querySelectorAll('.package-item');
+        this.applyFilter(items, type);
+    },
+
+    applyFilter(items, filter) {
+        items.forEach(item => {
+            const display = filter === 'all' || item.classList.contains(filter) ? 
+                'block' : 'none';
+            item.style.display = display;
+        });
+    }
+};
+
+// App Initialization and Exports
 const App = {
     async init() {
         if (AppState.initialized) {
@@ -1099,7 +1414,7 @@ const App = {
         try {
             console.log('Initializing application...');
             
-            // Inicializar controladores principales
+            // Initialize core functionality
             ResponsiveController.init();
             await ServicesController.loadServices();
             PopupController.init();
@@ -1107,10 +1422,12 @@ const App = {
             await CarouselController.loadCarouselContent();
             await CarouselController.loadPaqcarrContent();
             
-            // Configurar event listeners globales
-            this.setupGlobalEventListeners();
+            // Initialize additional features
+            FilterController.init();
+            AnimationController.init();
             
-            // Optimizar imágenes
+            // Setup global listeners
+            this.setupGlobalEventListeners();
             this.setupLazyLoading();
             
             AppState.initialized = true;
@@ -1122,12 +1439,10 @@ const App = {
     },
 
     setupGlobalEventListeners() {
-        // Manejar errores de imagen globalmente
         document.querySelectorAll('img').forEach(img => {
             EventManager.add(img, 'error', () => ImageManager.handleImageError(img));
         });
 
-        // Manejar cierre de popups con Escape
         EventManager.add(document, 'keydown', (e) => {
             if (e.key === 'Escape') {
                 const popup = DOMManager.getElement('popup');
@@ -1136,6 +1451,20 @@ const App = {
                 if (imageModal) imageModal.style.display = 'none';
             }
         });
+
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            if (location.hash) {
+                const targetElement = document.querySelector(location.hash);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+        window.addEventListener('resize', Utils.debounce(() => {
+            ResponsiveController.handleResize();
+        }, 250));
     },
 
     setupLazyLoading() {
@@ -1161,6 +1490,7 @@ const App = {
     },
 
     handleInitializationError(error) {
+        ErrorHandler.log(error, 'App initialization');
         const mainContainer = DOMManager.getElement('main');
         if (mainContainer) {
             mainContainer.innerHTML = `
@@ -1180,11 +1510,33 @@ const App = {
     }
 };
 
-// Inicialización cuando el DOM está listo
+// Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => App.init());
 
-// Limpieza cuando la página se descarga
+// Cleanup on page unload
 window.addEventListener('unload', () => App.cleanup());
 
-// Exportar para uso externo
-window.App = App;
+// Export to window object
+Object.assign(window, {
+    App,
+    ServicesController,
+    UIController,
+    PopupController,
+    CarouselController,
+    GalleryController,
+    FilterController,
+    AnimationController,
+    ResponsiveController,
+    CacheManager,
+    Utils,
+    ErrorHandler,
+    TemplateManager,
+    AnalyticsManager,
+    PerformanceMonitor,
+    ServiceWorkerManager,
+    CONFIG,
+    AppState,
+    EventManager,
+    ImageManager,
+    DOMManager
+});
