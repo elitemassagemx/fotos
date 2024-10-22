@@ -12,7 +12,8 @@ const AppState = {
     currentPopupIndex: 0,
     eventListeners: new Map(),
     initialized: false,
-    currentCategory: 'masajes'
+    currentCategory: 'masajes',
+    isSecondCategory: false
 };
 
 // Gestor de eventos
@@ -161,10 +162,7 @@ const ServicesController = {
 
         AppState.services[category].forEach((service, index) => {
             const serviceElement = template.content.cloneNode(true);
-            
-            // Configurar elementos del servicio
             this.configureServiceElement(serviceElement, service, index);
-            
             servicesList.appendChild(serviceElement);
         });
     },
@@ -310,17 +308,39 @@ const ServicesController = {
     },
 
     setupServiceCategories() {
-        const categoryInputs = document.querySelectorAll('.service-category-toggle input[type="radio"]');
-        categoryInputs.forEach(input => {
-            EventManager.add(input, 'change', () => {
-                const category = input.value;
-                AppState.currentCategory = category;
-                this.renderServices(category);
-                UIController.setupBenefitsNav(category);
-                this.setupPackageNav();
+        // Manejar ambos grupos de radio buttons
+        const categoryGroups = document.querySelectorAll('.service-category-toggle');
+        
+        categoryGroups.forEach((group, groupIndex) => {
+            const inputs = group.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                EventManager.add(input, 'change', () => {
+                    const category = input.value;
+                    AppState.currentCategory = category;
+                    AppState.isSecondCategory = groupIndex === 1;
+                    
+                    // Actualizar la sección correspondiente
+                    if (category === 'paquetes') {
+                        this.renderPackages();
+                    } else {
+                        this.renderServices(category);
+                    }
+                    
+                    // Actualizar navegación
+                    UIController.setupBenefitsNav(category);
+                    this.setupPackageNav();
+
+                    // Sincronizar los radio buttons entre grupos
+                    const otherGroup = groupIndex === 0 ? categoryGroups[1] : categoryGroups[0];
+                    const correspondingInput = otherGroup.querySelector(`input[value="${category}"]`);
+                    if (correspondingInput) {
+                        correspondingInput.checked = true;
+                    }
+                });
             });
         });
-        
+
+        // Configuración inicial
         UIController.setupBenefitsNav('masajes');
         this.setupPackageNav();
     },
@@ -331,14 +351,21 @@ const ServicesController = {
 
         packageNav.innerHTML = '';
         const allPackages = new Set();
+        const packageIcons = new Map();
 
         if (AppState.services.paquetes) {
             AppState.services.paquetes.forEach(pkg => {
-                allPackages.add(pkg.type || pkg.title);
+                if (pkg.type) {
+                    allPackages.add(pkg.type);
+                    // Guardar el ícono correspondiente si existe
+                    if (pkg.icon) {
+                        packageIcons.set(pkg.type, pkg.icon);
+                    }
+                }
             });
         }
 
-        UIController.createFilterButtons(packageNav, Array.from(allPackages), 'package');
+        UIController.createFilterButtons(packageNav, Array.from(allPackages), 'package', packageIcons);
     }
 };
 
@@ -378,7 +405,6 @@ const UIController = {
         benefitsNav.innerHTML = '';
         const allBenefits = new Set();
         const benefitIcons = new Map();
-        const benefitAlternativeText = new Map();
 
         if (AppState.services[category]) {
             AppState.services[category].forEach(service => {
@@ -387,7 +413,6 @@ const UIController = {
                         if (!allBenefits.has(benefit)) {
                             allBenefits.add(benefit);
                             benefitIcons.set(benefit, service.benefitsIcons[index]);
-                            benefitAlternativeText.set(benefit, this.getAlternativeText(benefit));
                         }
                     });
                 }
@@ -403,11 +428,11 @@ const UIController = {
             className: `${type}-btn active`,
             'data-filter': 'all'
         });
-        
-        allButton.innerHTML = `
-            <img src="${CONFIG.BASE_URL}todos.webp" alt="Todos">
+
+allButton.innerHTML = `
+            <img src="${CONFIG.BASE_URL}todos.webp" alt="Todos" class="filter-icon">
             <span class="visible-text">Todos</span>
-            <span class="hidden-text visually-hidden">all</span>
+            <span class="hidden-text">all</span>
         `;
         container.appendChild(allButton);
 
@@ -417,15 +442,15 @@ const UIController = {
                 className: `${type}-btn`,
                 'data-filter': item.toLowerCase().replace(/\s+/g, '-')
             });
-            
+
             const iconUrl = iconsMap.get(item) || 
                 `${CONFIG.BASE_URL}${item.toLowerCase().replace(/\s+/g, '-')}.webp`;
             const alternativeText = this.getAlternativeText(item);
             
-button.innerHTML = `
-                <img src="${ImageManager.buildImageUrl(iconUrl)}" alt="${item}">
+            button.innerHTML = `
+                <img src="${ImageManager.buildImageUrl(iconUrl)}" alt="${item}" class="filter-icon">
                 <span class="visible-text">${alternativeText}</span>
-                <span class="hidden-text visually-hidden">${item}</span>
+                <span class="hidden-text">${item}</span>
             `;
             container.appendChild(button);
         });
@@ -818,7 +843,7 @@ const CarouselController = {
         // Setup indicators
         const indicators = carousel.querySelectorAll('.carousel-indicators button');
         indicators.forEach((indicator, index) => {
-            EventManager.add(indicator, 'click', () => showSlide(index));
+        EventManager.add(indicator, 'click', () => showSlide(index));
         });
 
         // Update image sources
@@ -842,7 +867,7 @@ const CarouselController = {
             }
         });
 
-// Touch navigation (continuación)
+        // Touch navigation
         let touchstartX = 0;
         let touchendX = 0;
 
@@ -859,6 +884,50 @@ const CarouselController = {
                 showSlide((currentIndex - 1 + items.length) % items.length);
             }
         });
+    },
+
+    initPaqcarr() {
+        const carousel = DOMManager.getElement('paqcarr-container');
+        if (!carousel) return;
+
+        const items = carousel.querySelectorAll('.image-nav-item');
+        if (items.length === 0) return;
+
+        // Configurar el carrusel de paquetes
+        items.forEach(item => {
+            EventManager.add(item, 'click', () => {
+                const image = item.getAttribute('data-image');
+                const title = item.getAttribute('data-title');
+                const description = item.getAttribute('data-description');
+
+                // Actualizar imagen principal
+                const mainImageContainer = carousel.querySelector('.main-image-container');
+                if (mainImageContainer) {
+                    const mainImage = mainImageContainer.querySelector('.main-image');
+                    if (mainImage) {
+                        mainImage.src = image;
+                        mainImage.alt = title;
+                    }
+
+                    const imageInfo = mainImageContainer.querySelector('.image-info');
+                    if (imageInfo) {
+                        imageInfo.innerHTML = `
+                            <h3>${title}</h3>
+                            <p>${description}</p>
+                        `;
+                    }
+                }
+
+                // Actualizar estado activo
+                items.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        // Activar el primer item por defecto
+        if (items[0]) {
+            items[0].click();
+        }
     },
 
     updateIndicators(carousel, index) {
@@ -882,6 +951,31 @@ const ResponsiveController = {
         this.setupScrollHandling();
         this.setupResizeHandling();
         this.initializeMediaQueries();
+        this.setupSmoothScrolling();
+    },
+
+    setupSmoothScrolling() {
+        const navLinks = document.querySelectorAll('nav a, .fixed-bar a, .service-category-toggle a');
+        
+        navLinks.forEach(link => {
+            EventManager.add(link, 'click', (e) => {
+                const href = link.getAttribute('href');
+                
+                // Si es un enlace interno
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
     },
 
     setupResponsiveNavigation() {
@@ -949,15 +1043,11 @@ const ResponsiveController = {
     },
 
     optimizeForMobile() {
-        // Ajustar tamaños de fuente para móvil
         document.documentElement.style.setProperty('--base-font-size', '14px');
         document.documentElement.style.setProperty('--heading-font-size', '1.5rem');
-        
-        // Optimizar espaciado
         document.documentElement.style.setProperty('--container-padding', '10px');
         document.documentElement.style.setProperty('--section-spacing', '30px');
         
-        // Ajustar grid layouts
         const grids = document.querySelectorAll('.services-grid, .gallery-grid, .package-grid');
         grids.forEach(grid => {
             grid.style.gridTemplateColumns = '1fr';
@@ -966,7 +1056,6 @@ const ResponsiveController = {
     },
 
     optimizeForTablet() {
-        // Configuraciones para tablet
         document.documentElement.style.setProperty('--base-font-size', '15px');
         document.documentElement.style.setProperty('--heading-font-size', '1.75rem');
         document.documentElement.style.setProperty('--container-padding', '20px');
@@ -974,7 +1063,6 @@ const ResponsiveController = {
     },
 
     optimizeForDesktop() {
-        // Restaurar configuraciones desktop
         document.documentElement.style.setProperty('--base-font-size', '16px');
         document.documentElement.style.setProperty('--heading-font-size', '2rem');
         document.documentElement.style.setProperty('--container-padding', '30px');
