@@ -1,210 +1,281 @@
-const BASE_URL = "https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/";
-const CAROUSEL_IMAGE_BASE_URL = "https://raw.githubusercontent.com/elitemassagemx/prueba/main/carruimg/";
-let services = {};
-let currentPopupIndex = 0;
+// Configuración global
+const CONFIG = {
+    BASE_URL: "https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/",
+    CAROUSEL_IMAGE_BASE_URL: "https://raw.githubusercontent.com/elitemassagemx/prueba/main/carruimg/",
+    DEFAULT_ERROR_IMAGE: "https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/error.webp",
+    WHATSAPP_NUMBER: "5215640020305"
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded');
-    init();
-});
+// Gestor de estado de la aplicación
+const AppState = {
+    services: {},
+    currentPopupIndex: 0,
+    eventListeners: new Map(),
+    initialized: false,
+    currentCategory: 'masajes'
+};
 
-function init() {
-    loadJSONData();
-    setupPopup();
-    setupGalleryAnimations();
-    setupGalleryModal();
-    setupGallery();
-    loadCarouselContent();
-    loadPaqcarrContent();
-}
+// Gestor de eventos
+const EventManager = {
+    add(element, event, handler, options = false) {
+        if (!element) {
+            console.error('Cannot add event listener to null element');
+            return;
+        }
 
-function handleImageError(img) {
-    console.warn(`Failed to load image: ${img.src}`);
-    img.style.display = 'none';
-}
-
-function buildImageUrl(iconPath) {
-    if (!iconPath) return '';
-    return iconPath.startsWith('http') ? iconPath : `${BASE_URL}${iconPath}`;
-}
-
-function getElement(id) {
-    const element = document.getElementById(id);
-    if (!element) {
-        console.error(`Element with id "${id}" not found`);
-    }
-    return element;
-}
-
-function loadCarouselContent() {
-    fetch('carrusel.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('carrusel-container').innerHTML = data;
-            setTimeout(initCarousel, 500);
-        })
-        .catch(error => console.error('Error loading carousel:', error));
-}
-
-function loadPaqcarrContent() {
-    fetch('paqcarr.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('paqcarr-container').innerHTML = data;
-            initPaqcarr();
-        })
-        .catch(error => console.error('Error loading paqcarr:', error));
-}
-
-function loadJSONData() {
-    fetch('data.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text();
-        })
-        .then(text => {
-            try {
-                text = text.replace(/\$\{BASE_URL\}/g, BASE_URL);
-                const cleanedText = text.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-                const data = JSON.parse(cleanedText);
-                console.log('JSON data loaded successfully:', data);
-                services = data.services;
-                renderServices('masajes');
-                renderPackages();
-                setupFilters();
-                setupServiceCategories();
-                setupPackageNav();
-                setupGallery();
-            } catch (error) {
-                console.error('Error parsing JSON:', error);
-                console.error('Problematic JSON:', text);
-                throw error;
-            }
-        })
-        .catch(error => {
-            console.error('Error loading or parsing the JSON file:', error);
-            const servicesList = getElement('services-list');
-            const packageList = getElement('package-list');
-            if (servicesList) servicesList.innerHTML = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
-            if (packageList) packageList.innerHTML = '<p>Error al cargar los paquetes. Por favor, intente más tarde.</p>';
-        });
-}
-
-function renderServices(category) {
-    console.log(`Rendering services for category: ${category}`);
-    const servicesList = document.getElementById('services-list');
-    const template = document.getElementById('service-template');
-    if (!servicesList || !template) {
-        console.error('services-list or service-template not found');
-        return;
-    }
-
-    servicesList.innerHTML = '';
-
-    if (!Array.isArray(services[category])) {
-        console.error(`services[${category}] is not an array:`, services[category]);
-        servicesList.innerHTML = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
-        return;
-    }
-
-    services[category].forEach((service, index) => {
-        console.log(`Rendering service ${index + 1}:`, service);
-        const serviceElement = template.content.cloneNode(true);
+        element.addEventListener(event, handler, options);
         
-        const titleElement = serviceElement.querySelector('.service-title');
+        const key = `${element.id || 'anonymous'}-${event}`;
+        AppState.eventListeners.set(key, { element, event, handler });
+    },
+
+    remove(element, event) {
+        const key = `${element.id || 'anonymous'}-${event}`;
+        const listener = AppState.eventListeners.get(key);
+        
+        if (listener) {
+            listener.element.removeEventListener(listener.event, listener.handler);
+            AppState.eventListeners.delete(key);
+        }
+    },
+
+    removeAll() {
+        AppState.eventListeners.forEach(listener => {
+            listener.element.removeEventListener(listener.event, listener.handler);
+        });
+        AppState.eventListeners.clear();
+    }
+};
+
+// Gestor de imágenes
+const ImageManager = {
+    async loadImage(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => {
+                console.warn(`Failed to load image: ${url}`);
+                img.src = CONFIG.DEFAULT_ERROR_IMAGE;
+                resolve(img);
+            };
+            img.src = url;
+        });
+    },
+
+    handleImageError(img) {
+        img.onerror = null;
+        img.src = CONFIG.DEFAULT_ERROR_IMAGE;
+        console.warn(`Image load failed: ${img.src}`);
+    },
+
+    buildImageUrl(iconPath) {
+        if (!iconPath) return '';
+        return iconPath.startsWith('http') ? iconPath : `${CONFIG.BASE_URL}${iconPath}`;
+    }
+};
+
+// Gestor de DOM
+const DOMManager = {
+    getElement(id) {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.error(`Element with id "${id}" not found`);
+        }
+        return element;
+    },
+
+    createElement(tag, attributes = {}, children = []) {
+        const element = document.createElement(tag);
+        Object.entries(attributes).forEach(([key, value]) => {
+            if (key === 'className') {
+                element.className = value;
+            } else if (key === 'textContent') {
+                element.textContent = value;
+            } else {
+                element.setAttribute(key, value);
+            }
+        });
+        children.forEach(child => element.appendChild(child));
+        return element;
+    }
+};
+
+// Controlador de servicios
+const ServicesController = {
+    async loadServices() {
+        try {
+            const response = await fetch('data.json');
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            let text = await response.text();
+            text = text.replace(/\$\{BASE_URL\}/g, CONFIG.BASE_URL)
+                      .replace(/,\s*}/g, '}')
+                      .replace(/,\s*]/g, ']');
+            
+            const data = JSON.parse(text);
+            AppState.services = data.services;
+            
+            this.renderInitialServices();
+            return true;
+        } catch (error) {
+            console.error('Error loading services:', error);
+            this.handleServiceLoadError();
+            return false;
+        }
+    },
+
+    renderInitialServices() {
+        this.renderServices('masajes');
+        this.renderPackages();
+        UIController.setupFilters();
+        this.setupServiceCategories();
+        this.setupPackageNav();
+    },
+
+    handleServiceLoadError() {
+        const servicesList = DOMManager.getElement('services-list');
+        const packageList = DOMManager.getElement('package-list');
+        
+        const errorMessage = '<p>Error al cargar los servicios. Por favor, intente más tarde.</p>';
+        if (servicesList) servicesList.innerHTML = errorMessage;
+        if (packageList) packageList.innerHTML = errorMessage;
+    },
+
+    renderServices(category) {
+        console.log(`Rendering services for category: ${category}`);
+        const servicesList = DOMManager.getElement('services-list');
+        const template = DOMManager.getElement('service-template');
+        
+        if (!servicesList || !template) {
+            console.error('Required elements not found');
+            return;
+        }
+
+        servicesList.innerHTML = '';
+
+        if (!Array.isArray(AppState.services[category])) {
+            console.error(`Invalid services data for category: ${category}`);
+            servicesList.innerHTML = '<p>Error al cargar los servicios.</p>';
+            return;
+        }
+
+        AppState.services[category].forEach((service, index) => {
+            const serviceElement = template.content.cloneNode(true);
+            
+            // Configurar elementos del servicio
+            this.configureServiceElement(serviceElement, service, index);
+            
+            servicesList.appendChild(serviceElement);
+        });
+    },
+
+    configureServiceElement(element, service, index) {
+        const titleElement = element.querySelector('.service-title');
+        const serviceIcon = element.querySelector('.service-icon');
+        const descriptionElement = element.querySelector('.service-description');
+        const benefitsContainer = element.querySelector('.benefits-container');
+        const durationIcon = element.querySelector('.duration-icon');
+        const durationElement = element.querySelector('.service-duration');
+        const saberMasButton = element.querySelector('.saber-mas-button');
+        const serviceItem = element.querySelector('.service-item');
+        const serviceBackground = element.querySelector('.service-background');
+
         if (titleElement) titleElement.textContent = service.title || 'Sin título';
         
-        const serviceIcon = serviceElement.querySelector('.service-icon');
         if (serviceIcon && service.icon) {
-            serviceIcon.src = buildImageUrl(service.icon);
-            serviceIcon.onerror = () => handleImageError(serviceIcon);
+            serviceIcon.src = ImageManager.buildImageUrl(service.icon);
+            serviceIcon.onerror = () => ImageManager.handleImageError(serviceIcon);
         }
         
-        const descriptionElement = serviceElement.querySelector('.service-description');
-        if (descriptionElement) descriptionElement.textContent = service.description || 'Sin descripción';
-        
-        const benefitsContainer = serviceElement.querySelector('.benefits-container');
-        if (benefitsContainer && Array.isArray(service.benefitsIcons)) {
-            service.benefitsIcons.forEach((iconUrl, index) => {
-                const benefitItem = document.createElement('div');
-                benefitItem.classList.add('benefit-item');
-                const img = document.createElement('img');
-                img.src = buildImageUrl(iconUrl);
-                img.alt = 'Benefit icon';
-                img.classList.add('benefit-icon');
-                img.style.width = '24px';
-                img.style.height = '24px';
-                img.onerror = () => handleImageError(img);
-                const span = document.createElement('span');
-                span.textContent = service.benefits[index] || '';
-                benefitItem.appendChild(img);
-                benefitItem.appendChild(span);
-                benefitsContainer.appendChild(benefitItem);
-            });
+        if (descriptionElement) {
+            descriptionElement.textContent = service.description || 'Sin descripción';
         }
-        
-        const durationIcon = serviceElement.querySelector('.duration-icon');
-        if (durationIcon && service.durationIcon) {
-            durationIcon.src = buildImageUrl(service.durationIcon);
-            durationIcon.onerror = () => handleImageError(durationIcon);
-        }
-        
-        const durationElement = serviceElement.querySelector('.service-duration');
-        if (durationElement) durationElement.textContent = service.duration || 'Duración no especificada';
 
-        const saberMasButton = serviceElement.querySelector('.saber-mas-button');
+        this.configureBenefits(benefitsContainer, service);
+
+        if (durationIcon && service.durationIcon) {
+            durationIcon.src = ImageManager.buildImageUrl(service.durationIcon);
+            durationIcon.onerror = () => ImageManager.handleImageError(durationIcon);
+        }
+
+        if (durationElement) {
+            durationElement.textContent = service.duration || 'Duración no especificada';
+        }
+
         if (saberMasButton) {
             saberMasButton.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showPopup(service, index);
+                PopupController.showPopup(service, index);
             });
         }
 
-        const serviceItem = serviceElement.querySelector('.service-item');
-        if (serviceItem) {
-            if (Array.isArray(service.benefits)) {
-                service.benefits.forEach(benefit => {
-                    serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
-                });
-            }
+        if (serviceItem && Array.isArray(service.benefits)) {
+            service.benefits.forEach(benefit => {
+                serviceItem.classList.add(benefit.toLowerCase().replace(/\s+/g, '-'));
+            });
         }
 
-        const serviceBackground = serviceElement.querySelector('.service-background');
         if (serviceBackground && service.backgroundImage) {
-            serviceBackground.style.backgroundImage = `url(${buildImageUrl(service.backgroundImage)})`;
+            serviceBackground.style.backgroundImage = 
+                `url(${ImageManager.buildImageUrl(service.backgroundImage)})`;
+        }
+    },
+
+    configureBenefits(container, service) {
+        if (!container || !Array.isArray(service.benefitsIcons)) return;
+
+        service.benefitsIcons.forEach((iconUrl, index) => {
+            const benefitItem = DOMManager.createElement('div', { className: 'benefit-item' });
+            
+            const img = DOMManager.createElement('img', {
+                src: ImageManager.buildImageUrl(iconUrl),
+                alt: 'Benefit icon',
+                className: 'benefit-icon',
+                style: 'width: 24px; height: 24px'
+            });
+            
+            img.onerror = () => ImageManager.handleImageError(img);
+            
+            const span = DOMManager.createElement('span', {
+                textContent: service.benefits[index] || ''
+            });
+            
+            benefitItem.appendChild(img);
+            benefitItem.appendChild(span);
+            container.appendChild(benefitItem);
+        });
+    },
+
+    renderPackages() {
+        console.log('Rendering packages');
+        const packageList = DOMManager.getElement('package-list');
+        const template = DOMManager.getElement('package-template');
+        
+        if (!packageList || !template) {
+            console.error('Package elements not found');
+            return;
         }
 
-        servicesList.appendChild(serviceElement);
-    });
-    console.log(`Rendered ${services[category].length} services`);
-}
+        packageList.innerHTML = '';
 
-function renderPackages() {
-    console.log('Rendering packages');
-    const packageList = getElement('package-list');
-    const template = getElement('package-template');
-    if (!packageList || !template) {
-        console.error('Package list or template not found');
-        return;
-    }
+        if (!Array.isArray(AppState.services.paquetes)) {
+            console.error('Invalid package data');
+            packageList.innerHTML = '<p>Error al cargar los paquetes.</p>';
+            return;
+        }
 
-    packageList.innerHTML = '';
-    if (!Array.isArray(services.paquetes)) {
-        console.error('services.paquetes is not an array:', services.paquetes);
-        packageList.innerHTML = '<p>Error al cargar los paquetes. Por favor, intente más tarde.</p>';
-        return;
-    }
-    
-    services.paquetes.forEach((pkg, index) => {
-        console.log(`Rendering package ${index + 1}:`, pkg);
-        const packageElement = template.content.cloneNode(true);
+        AppState.services.paquetes.forEach((pkg, index) => {
+            const packageElement = template.content.cloneNode(true);
+            this.configurePackageElement(packageElement, pkg, index);
+            packageList.appendChild(packageElement);
+        });
+    },
+
+    configurePackageElement(element, pkg, index) {
+        element.querySelector('.package-title').textContent = pkg.title || 'Sin título';
+        element.querySelector('.package-description').textContent = pkg.description || 'Sin descripción';
         
-        packageElement.querySelector('.package-title').textContent = pkg.title || 'Sin título';
-        packageElement.querySelector('.package-description').textContent = pkg.description || 'Sin descripción';
-        
-        const includesList = packageElement.querySelector('.package-includes-list');
+        const includesList = element.querySelector('.package-includes-list');
         if (includesList && Array.isArray(pkg.includes)) {
             pkg.includes.forEach(item => {
                 const li = document.createElement('li');
@@ -212,403 +283,449 @@ function renderPackages() {
                 includesList.appendChild(li);
             });
         }
-        
-        packageElement.querySelector('.package-duration-text').textContent = pkg.duration || 'Duración no especificada';
-        
-        const benefitsContainer = packageElement.querySelector('.package-benefits');
-        if (benefitsContainer && Array.isArray(pkg.benefitsIcons)) {
-            pkg.benefitsIcons.forEach((iconUrl, index) => {
-                const benefitItem = document.createElement('div');
-                benefitItem.classList.add('benefit-item');
-                const img = document.createElement('img');
-                img.src = buildImageUrl(iconUrl);
-                img.alt = 'Benefit icon';
-                img.classList.add('benefit-icon');
-                img.style.width = '24px';
-                img.style.height = '24px';
-                img.onerror = () => handleImageError(img);
-                const span = document.createElement('span');
-                span.textContent = pkg.benefits[index] || '';
-                benefitItem.appendChild(img);
-                benefitItem.appendChild(span);
-                benefitsContainer.appendChild(benefitItem);
-            });
-        }
 
-        const saberMasButton = packageElement.querySelector('.saber-mas-button');
+        element.querySelector('.package-duration-text').textContent = 
+            pkg.duration || 'Duración no especificada';
+
+        this.configureBenefits(element.querySelector('.package-benefits'), pkg);
+
+        const saberMasButton = element.querySelector('.saber-mas-button');
         if (saberMasButton) {
             saberMasButton.addEventListener('click', (e) => {
                 e.stopPropagation();
-                showPopup(pkg, index, true);
+                PopupController.showPopup(pkg, index, true);
             });
         }
 
-        const packageItem = packageElement.querySelector('.package-item');
+        const packageItem = element.querySelector('.package-item');
         if (packageItem && pkg.type) {
             packageItem.classList.add(pkg.type.toLowerCase().replace(/\s+/g, '-'));
         }
 
-        const packageBackground = packageElement.querySelector('.package-background');
+        const packageBackground = element.querySelector('.package-background');
         if (packageBackground && pkg.backgroundImage) {
-            packageBackground.style.backgroundImage = `url(${buildImageUrl(pkg.backgroundImage)})`;
+            packageBackground.style.backgroundImage = 
+                `url(${ImageManager.buildImageUrl(pkg.backgroundImage)})`;
+        }
+    },
+
+    setupServiceCategories() {
+        const categoryInputs = document.querySelectorAll('.service-category-toggle input[type="radio"]');
+        categoryInputs.forEach(input => {
+            EventManager.add(input, 'change', () => {
+                const category = input.value;
+                AppState.currentCategory = category;
+                this.renderServices(category);
+                UIController.setupBenefitsNav(category);
+                this.setupPackageNav();
+            });
+        });
+        
+        UIController.setupBenefitsNav('masajes');
+        this.setupPackageNav();
+    },
+
+    setupPackageNav() {
+        const packageNav = document.querySelector('.package-nav');
+        if (!packageNav) return;
+
+        packageNav.innerHTML = '';
+        const allPackages = new Set();
+
+        if (AppState.services.paquetes) {
+            AppState.services.paquetes.forEach(pkg => {
+                allPackages.add(pkg.type || pkg.title);
+            });
         }
 
-        packageList.appendChild(packageElement);
-    });
-    console.log(`Rendered ${services.paquetes.length} packages`);
-}
-
-function showPopup(data, index, isPackage = false) {
-    console.log('Showing popup for:', data.title);
-    const popup = getElement('popup');
-    const popupContent = popup.querySelector('.popup-content');
-    const popupTitle = getElement('popup-title');
-    const popupImage = getElement('popup-image');
-    const popupDescription = getElement('popup-description');
-    const popupBenefits = popup.querySelector('.popup-benefits');
-    const popupIncludes = popup.querySelector('.popup-includes');
-    const popupDuration = getElement('popup-duration');
-    const whatsappButton = getElement('whatsapp-button');
-    if (!popup || !popupContent || !popupTitle || !popupImage || !popupDescription || !popupBenefits || !popupIncludes || !popupDuration || !whatsappButton) {
-        console.error('One or more popup elements not found');
-        return;
+        UIController.createFilterButtons(packageNav, Array.from(allPackages), 'package');
     }
+};
 
-    currentPopupIndex = index;
+// Controlador de UI
+const UIController = {
+    setupFilters() {
+        this.setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
+        this.setupFilterButtons('.package-nav', '#package-list', '.package-item');
+    },
 
-    popupTitle.textContent = data.title || '';
-    popupImage.src = buildImageUrl(data.popupImage || data.image);
-    popupImage.alt = data.title || '';
-    popupImage.onerror = () => handleImageError(popupImage);
-    popupDescription.textContent = data.popupDescription || data.description || '';
-    
-    popupBenefits.innerHTML = '';
-    popupIncludes.innerHTML = '';
+    setupFilterButtons(navSelector, listSelector, itemSelector) {
+        const filterButtons = document.querySelectorAll(`${navSelector} button`);
+        const items = document.querySelectorAll(itemSelector);
 
-    if (Array.isArray(data.benefits) && Array.isArray(data.benefitsIcons)) {
-        data.benefits.forEach((benefit, index) => {
-            const benefitItem = document.createElement('div');
-            benefitItem.classList.add('popup-benefits-item');
-            const img = document.createElement('img');
-            img.src = buildImageUrl(data.benefitsIcons[index]);
-            img.alt = benefit;
-            const span = document.createElement('span');
-            span.textContent = benefit;
-            benefitItem.appendChild(img);
-            benefitItem.appendChild(span);
-            popupBenefits.appendChild(benefitItem);
-        });
-    }
-
-    if (isPackage && Array.isArray(data.includes)) {
-        data.includes.forEach(item => {
-            const includeItem = document.createElement('div');
-            includeItem.classList.add('popup-includes-item');
-            const img = document.createElement('img');
-            img.src = buildImageUrl('check-icon.webp');
-            img.alt = 'Incluido';
-            const span = document.createElement('span');
-            span.textContent = item;
-            includeItem.appendChild(img);
-            includeItem.appendChild(span);
-            popupIncludes.appendChild(includeItem);
-        });
-    }
-
-    popupDuration.textContent = data.duration || '';
-
-    whatsappButton.onclick = () => sendWhatsAppMessage('Reservar', data.title);
-
-    setupPopupCarousel(isPackage);
-
-    popup.style.display = 'block';
-}
-
-function setupPopupCarousel(isPackage) {
-    const popupContent = document.querySelector('.popup-content');
-    let startX, currentX;
-
-    popupContent.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-    });
-
-    popupContent.addEventListener('touchmove', (e) => {
-        if (!startX) return;
-        currentX = e.touches[0].clientX;
-        const diff = startX - currentX;
-        if (Math.abs(diff) > 50) {
-            navigatePopup(diff > 0 ? 1 : -1, isPackage);
-            startX = null;
-        }
-    });
-
-    popupContent.addEventListener('touchend', () => {
-        startX = null;
-    });
-}
-
-function navigatePopup(direction, isPackage) {
-    const items = isPackage ? services.paquetes : services[getCurrentCategory()];
-    currentPopupIndex = (currentPopupIndex + direction + items.length) % items.length;
-    showPopup(items[currentPopupIndex], currentPopupIndex, isPackage);
-}
-
-function getCurrentCategory() {
-    const checkedRadio = document.querySelector('.service-category-toggle input[type="radio"]:checked');
-    return checkedRadio ? checkedRadio.value : 'masajes';
-}
-
-function sendWhatsAppMessage(action, serviceTitle) {
-    console.log(`Sending WhatsApp message for: ${action} - ${serviceTitle}`);
-    const message = encodeURIComponent(`Hola! Quiero ${action} un ${serviceTitle}`);
-    const url = `https://wa.me/5215640020305?text=${message}`;
-    window.open(url, '_blank');
-}
-
-function setupServiceCategories() {
-    const categoryInputs = document.querySelectorAll('.service-category-toggle input[type="radio"]');
-    categoryInputs.forEach(input => {
-        input.addEventListener('change', () => {
-            const category = input.value;
-            renderServices(category);
-            setupBenefitsNav(category);
-            setupPackageNav();
-        });
-    });
-    setupBenefitsNav('masajes');
-    setupPackageNav();
-}
-function setupBenefitsNav(category) {
-    const benefitsNav = document.querySelector('.benefits-nav');
-    if (!benefitsNav) return;
-
-    benefitsNav.innerHTML = '';
-    const allBenefits = new Set();
-    const benefitIcons = new Map();
-    const benefitAlternativeText = new Map();
-
-    if (services[category]) {
-        services[category].forEach(service => {
-            if (Array.isArray(service.benefits) && Array.isArray(service.benefitsIcons)) {                        
-                service.benefits.forEach((benefit, index) => {
-                    if (!allBenefits.has(benefit)) {
-                        allBenefits.add(benefit);
-                        benefitIcons.set(benefit, service.benefitsIcons[index]);
-                        benefitAlternativeText.set(benefit, getAlternativeText(benefit));
-                    }
+        filterButtons.forEach(button => {
+            EventManager.add(button, 'click', () => {
+                const filter = button.querySelector('.hidden-text').textContent
+                    .toLowerCase().replace(/\s+/g, '-');
+                
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                items.forEach(item => {
+                    item.style.display = 
+                        (filter === 'all' || item.classList.contains(filter)) 
+                            ? 'block' 
+                            : 'none';
                 });
+            });
+        });
+    },
+
+    setupBenefitsNav(category) {
+        const benefitsNav = document.querySelector('.benefits-nav');
+        if (!benefitsNav) return;
+
+        benefitsNav.innerHTML = '';
+        const allBenefits = new Set();
+        const benefitIcons = new Map();
+        const benefitAlternativeText = new Map();
+
+        if (AppState.services[category]) {
+            AppState.services[category].forEach(service => {
+                if (Array.isArray(service.benefits) && Array.isArray(service.benefitsIcons)) {
+                    service.benefits.forEach((benefit, index) => {
+                        if (!allBenefits.has(benefit)) {
+                            allBenefits.add(benefit);
+                            benefitIcons.set(benefit, service.benefitsIcons[index]);
+                            benefitAlternativeText.set(benefit, this.getAlternativeText(benefit));
+                        }
+                    });
+                }
+            });
+        }
+
+        this.createFilterButtons(benefitsNav, Array.from(allBenefits), 'benefit', benefitIcons);
+    },
+
+    createFilterButtons(container, items, type, iconsMap = new Map()) {
+        // Crear botón "Todos"
+        const allButton = DOMManager.createElement('button', {
+            className: `${type}-btn active`,
+            'data-filter': 'all'
+        });
+        
+        allButton.innerHTML = `
+            <img src="${CONFIG.BASE_URL}todos.webp" alt="Todos">
+            <span class="visible-text">Todos</span>
+            <span class="hidden-text visually-hidden">all</span>
+        `;
+        container.appendChild(allButton);
+
+        // Crear botones para cada item
+        items.forEach(item => {
+            const button = DOMManager.createElement('button', {
+                className: `${type}-btn`,
+                'data-filter': item.toLowerCase().replace(/\s+/g, '-')
+            });
+            
+            const iconUrl = iconsMap.get(item) || 
+                `${CONFIG.BASE_URL}${item.toLowerCase().replace(/\s+/g, '-')}.webp`;
+            const alternativeText = this.getAlternativeText(item);
+            
+button.innerHTML = `
+                <img src="${ImageManager.buildImageUrl(iconUrl)}" alt="${item}">
+                <span class="visible-text">${alternativeText}</span>
+                <span class="hidden-text visually-hidden">${item}</span>
+            `;
+            container.appendChild(button);
+        });
+    },
+
+    getAlternativeText(text) {
+        const alternativeTexts = {
+            "Bajará tu Estrés": "Relax",
+            "Cambiará tu Ánimo": "Ánimo",
+            "Aliviarás Tensiones": "Alivio",
+            "Aliviarás Dolores Musculares": "Músculos",
+            "Mejorarás tu Circulación": "Circula",
+            "Relajación Profunda": "Profundo",
+            "Relajación": "Relax",
+            "Alivio de Dolores en Espalda y Cuello": "Espalda",
+            "Relajación Total": "Total",
+            "Mejora Circulación Sanguínea": "Sangre",
+            "Hidratará tu Piel": "Hidrata",
+            "Multisensorial": "Sentidos",
+            "Mejorarás tu Equilibrio": "Balance",
+            "Reducirás el Estrés": "Anti-estrés",
+            "Aumento de Energía": "Energía",
+            "Alivio Dolor Muscular": "No dolor",
+            "Reduce Ansiedad": "Calma",
+            "Calma Profunda": "Sereno"
+        };
+        return alternativeTexts[text] || text;
+    }
+};
+
+// Controlador de Popup
+const PopupController = {
+    init() {
+        const popup = DOMManager.getElement('popup');
+        const closeButton = popup.querySelector('.close');
+        
+        if (!popup || !closeButton) return;
+
+        EventManager.add(closeButton, 'click', () => {
+            console.log('Closing popup');
+            popup.style.display = 'none';
+        });
+
+        EventManager.add(window, 'click', (event) => {
+            if (event.target === popup) {
+                console.log('Closing popup (clicked outside)');
+                popup.style.display = 'none';
             }
         });
-    }
 
-    const allButton = document.createElement('button');
-    allButton.classList.add('benefit-btn', 'active');
-    allButton.dataset.filter = 'all';
-    allButton.innerHTML = `
-        <img src="${BASE_URL}todos.webp" alt="Todos">
-        <span class="visible-text">Todos</span>
-        <span class="hidden-text visually-hidden">all</span>
-    `;
-    benefitsNav.appendChild(allButton);
+        this.setupPopupCarousel();
+    },
 
-    allBenefits.forEach(benefit => {
-        const button = document.createElement('button');
-        button.classList.add('benefit-btn');
-        button.dataset.filter = benefit.toLowerCase().replace(/\s+/g, '-');
-        
-        const iconUrl = benefitIcons.get(benefit) || `${BASE_URL}${benefit.toLowerCase().replace(/\s+/g, '-')}.webp`;
-        const alternativeText = benefitAlternativeText.get(benefit);
-        
-        button.innerHTML = `
-            <img src="${buildImageUrl(iconUrl)}" alt="${benefit}">
-            <span class="visible-text">${alternativeText}</span>
-            <span class="hidden-text visually-hidden">${benefit}</span>
-        `;
-        benefitsNav.appendChild(button);
-    });
+    showPopup(data, index, isPackage = false) {
+        console.log('Showing popup for:', data.title);
+        const popup = DOMManager.getElement('popup');
+        const elements = {
+            content: popup.querySelector('.popup-content'),
+            title: DOMManager.getElement('popup-title'),
+            image: DOMManager.getElement('popup-image'),
+            description: DOMManager.getElement('popup-description'),
+            benefits: popup.querySelector('.popup-benefits'),
+            includes: popup.querySelector('.popup-includes'),
+            duration: DOMManager.getElement('popup-duration'),
+            whatsappButton: DOMManager.getElement('whatsapp-button')
+        };
 
-    setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
-}
+        if (!this.validatePopupElements(elements)) return;
 
-function getAlternativeText(benefit) {
-    const alternativeTexts = {
-        "Bajará tu Estrés": "Relax",
-        "Cambiará tu Ánimo": "Ánimo",
-        "Aliviarás Tensiones": "Alivio",
-        "Aliviarás Dolores Musculares": "Músculos",
-        "Mejorarás tu Circulación": "Circula",
-        "Relajación Profunda": "Profundo",
-        "Relajación": "Relax",
-        "Alivio de Dolores en Espalda y Cuello": "Espalda",
-        "Relajación Total": "Total",
-        "Mejora Circulación Sanguínea": "Sangre",
-        "Hidratará tu Piel": "Hidrata",
-        "Multisensorial": "Sentidos",
-        "Mejorarás tu Equilibrio": "Balance",
-        "Reducirás el Estrés": "Anti-estrés",
-        "Aumento de Energía": "Energía",
-        "Alivio Dolor Muscular": "No dolor",
-        "Reduce Ansiedad": "Calma",
-        "Calma Profunda": "Sereno"
-    };
-    return alternativeTexts[benefit] || benefit;
-}
+        AppState.currentPopupIndex = index;
+        this.populatePopupContent(elements, data, isPackage);
+        popup.style.display = 'block';
+    },
 
-function setupPackageNav() {
-    const packageNav = document.querySelector('.package-nav');
-    if (!packageNav) return;
-
-    packageNav.innerHTML = '';
-    const allPackages = new Set();
-
-    if (services.paquetes) {
-        services.paquetes.forEach(pkg => {
-            allPackages.add(pkg.type || pkg.title);
-        });
-    }
-
-    const allButton = document.createElement('button');
-    allButton.classList.add('package-btn', 'active');
-    allButton.dataset.filter = 'all';
-    allButton.innerHTML = `
-        <img src="${BASE_URL}todos.webp" alt="Todos">
-        <span class="visible-text">Todos</span>
-        <span class="hidden-text visually-hidden">all</span>
-    `;
-    packageNav.appendChild(allButton);
-
-    allPackages.forEach(packageType => {
-        const button = document.createElement('button');
-        button.classList.add('package-btn');
-        button.dataset.filter = packageType.toLowerCase().replace(/\s+/g, '-');
-        const iconUrl = `${BASE_URL}${packageType.toLowerCase().replace(/\s+/g, '-')}-icon.webp`;
-        const alternativeText = getAlternativeText(packageType);
-        button.innerHTML = `
-            <img src="${iconUrl}" alt="${packageType}">
-            <span class="visible-text">${alternativeText}</span>
-            <span class="hidden-text visually-hidden">${packageType}</span>
-        `;
-        packageNav.appendChild(button);
-    });
-
-    setupFilterButtons('.package-nav', '#package-list', '.package-item');
-}
-
-function setupPopup() {
-    const popup = getElement('popup');
-    const closeButton = popup.querySelector('.close');
-    if (!popup || !closeButton) return;
-
-    closeButton.addEventListener('click', () => {
-        console.log('Closing popup');
-        popup.style.display = 'none';
-    });
-
-    window.addEventListener('click', (event) => {
-        if (event.target === popup) {
-            console.log('Closing popup (clicked outside)');
-            popup.style.display = 'none';
+    validatePopupElements(elements) {
+        for (const [key, element] of Object.entries(elements)) {
+            if (!element) {
+                console.error(`Popup element missing: ${key}`);
+                return false;
+            }
         }
-    });
-}
+        return true;
+    },
 
-function setupGallery() {
-    const galleryGrid = document.querySelector('.gallery-grid');
-    const verMasButton = getElement('ver-mas-galeria');
+    populatePopupContent(elements, data, isPackage) {
+        elements.title.textContent = data.title || '';
+        elements.image.src = ImageManager.buildImageUrl(data.popupImage || data.image);
+        elements.image.alt = data.title || '';
+        elements.image.onerror = () => ImageManager.handleImageError(elements.image);
+        elements.description.textContent = data.popupDescription || data.description || '';
+        
+        elements.benefits.innerHTML = '';
+        elements.includes.innerHTML = '';
 
-    if (!galleryGrid || !verMasButton) {
-        console.error('Gallery elements not found');
-        return;
+        this.populateBenefits(elements.benefits, data);
+        if (isPackage) {
+            this.populateIncludes(elements.includes, data);
+        }
+
+        elements.duration.textContent = data.duration || '';
+        elements.whatsappButton.onclick = () => 
+            this.sendWhatsAppMessage('Reservar', data.title);
+    },
+
+    populateBenefits(container, data) {
+        if (Array.isArray(data.benefits) && Array.isArray(data.benefitsIcons)) {
+            data.benefits.forEach((benefit, index) => {
+                const benefitItem = DOMManager.createElement('div', {
+                    className: 'popup-benefits-item'
+                });
+                
+                const img = DOMManager.createElement('img', {
+                    src: ImageManager.buildImageUrl(data.benefitsIcons[index]),
+                    alt: benefit
+                });
+                
+                const span = DOMManager.createElement('span', {
+                    textContent: benefit
+                });
+                
+                benefitItem.appendChild(img);
+                benefitItem.appendChild(span);
+                container.appendChild(benefitItem);
+            });
+        }
+    },
+
+    populateIncludes(container, data) {
+        if (Array.isArray(data.includes)) {
+            data.includes.forEach(item => {
+                const includeItem = DOMManager.createElement('div', {
+                    className: 'popup-includes-item'
+                });
+                
+                const img = DOMManager.createElement('img', {
+                    src: ImageManager.buildImageUrl('check-icon.webp'),
+                    alt: 'Incluido'
+                });
+                
+                const span = DOMManager.createElement('span', {
+                    textContent: item
+                });
+                
+                includeItem.appendChild(img);
+                includeItem.appendChild(span);
+                container.appendChild(includeItem);
+            });
+        }
+    },
+
+    setupPopupCarousel() {
+        const popupContent = document.querySelector('.popup-content');
+        let startX, currentX;
+
+        EventManager.add(popupContent, 'touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        EventManager.add(popupContent, 'touchmove', (e) => {
+            if (!startX) return;
+            currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+            if (Math.abs(diff) > 50) {
+                this.navigatePopup(diff > 0 ? 1 : -1);
+                startX = null;
+            }
+        });
+
+        EventManager.add(popupContent, 'touchend', () => {
+            startX = null;
+        });
+    },
+
+    navigatePopup(direction, isPackage = false) {
+        const items = isPackage ? AppState.services.paquetes : AppState.services[AppState.currentCategory];
+        AppState.currentPopupIndex = 
+            (AppState.currentPopupIndex + direction + items.length) % items.length;
+        this.showPopup(items[AppState.currentPopupIndex], AppState.currentPopupIndex, isPackage);
+    },
+
+    sendWhatsAppMessage(action, serviceTitle) {
+        console.log(`Sending WhatsApp message for: ${action} - ${serviceTitle}`);
+        const message = encodeURIComponent(`Hola! Quiero ${action} un ${serviceTitle}`);
+        const url = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${message}`;
+        window.open(url, '_blank');
     }
+};
 
-    // Aquí deberías cargar las imágenes de la galería desde tu fuente de datos
-    const galleryImages = [
-        { src: 'QUESOSAHM.webp', title: 'Tabla Gourmet', description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita' },
-        { src: 'choco2.webp', title: 'Chocolate Deluxe', description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate' },
-        { src: 'SILLAS.webp', title: 'Área de Relajación', description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje' },
-    ];
+// Controlador de Galería
+const GalleryController = {
+    init() {
+        this.setupGallery();
+        this.setupGalleryAnimations();
+        this.setupGalleryModal();
+    },
 
-    // Configurar la cuadrícula con solo 3 imágenes
-    galleryImages.forEach(image => {
-        const galleryItem = document.createElement('div');
-        galleryItem.classList.add('gallery-item');
+    setupGallery() {
+        const galleryGrid = document.querySelector('.gallery-grid');
+        const verMasButton = DOMManager.getElement('ver-mas-galeria');
+
+        if (!galleryGrid || !verMasButton) {
+            console.error('Gallery elements not found');
+            return;
+        }
+
+        const galleryImages = [
+            {
+                src: 'QUESOSAHM.webp',
+                title: 'Tabla Gourmet',
+                description: 'Después de tu masaje en pareja saborea una exquisita selección de jamón curado, quesos gourmet, fresas cubiertas de chocolate y copas de vino. Un toque de lujo y placer compartido para complementar tu visita'
+            },
+            {
+                src: 'choco2.webp',
+                title: 'Chocolate Deluxe',
+                description: 'Sumérgete en una experiencia de dulzura y relajación con nuestro tratamiento de chocolate'
+            },
+            {
+                src: 'SILLAS.webp',
+                title: 'Área de Relajación',
+                description: 'Disfruta de nuestro acogedor espacio de relajación antes o después de tu masaje'
+            }
+        ];
+
+        galleryImages.forEach(image => {
+            const galleryItem = this.createGalleryItem(image);
+            galleryGrid.appendChild(galleryItem);
+        });
+
+        EventManager.add(verMasButton, 'click', () => {
+            window.location.href = 'galeria.html';
+        });
+    },
+
+    createGalleryItem(image) {
+        const galleryItem = DOMManager.createElement('div', {
+            className: 'gallery-item'
+        });
+
         galleryItem.innerHTML = `
-            <img src="${buildImageUrl(image.src)}" alt="${image.title}">
+            <img src="${ImageManager.buildImageUrl(image.src)}" alt="${image.title}">
             <div class="image-overlay">
                 <h3 class="image-title">${image.title}</h3>
                 <p class="image-description">${image.description}</p>
             </div>
         `;
-        galleryItem.addEventListener('click', () => {
-            showImageDetails(image);
+
+        EventManager.add(galleryItem, 'click', () => {
+            this.showImageDetails(image);
         });
-        galleryGrid.appendChild(galleryItem);
-    });
 
-    verMasButton.addEventListener('click', () => {
-        window.location.href = 'galeria.html';
-    });
-}
+        return galleryItem;
+    },
 
-function showImageDetails(image) {
-    const modal = getElement('imageModal');
-    const modalImg = getElement('modalImage');
-    const modalDescription = getElement('modalDescription');
+    showImageDetails(image) {
+        const modal = DOMManager.getElement('imageModal');
+        const modalImg = DOMManager.getElement('modalImage');
+        const modalDescription = DOMManager.getElement('modalDescription');
 
-    if (!modal || !modalImg || !modalDescription) {
-        console.error('Modal elements not found');
-        return;
-    }
-
-    modalImg.src = buildImageUrl(image.src);
-    modalImg.alt = image.title;
-    modalDescription.innerHTML = `<h3>${image.title}</h3><p>${image.description}</p>`;
-    modal.style.display = 'block';
-}
-
-function setupGalleryAnimations() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-        console.warn('GSAP or ScrollTrigger not loaded. Gallery animations will not work.');
-        return;
-    }
-
-    console.log('GSAP and ScrollTrigger are loaded');
-    gsap.registerPlugin(ScrollTrigger);
-
-    const gallery = document.querySelector('.gallery-container');
-    if (!gallery) {
-        console.error('Gallery container not found');
-        return;
-    }
-
-    console.log('Gallery container found');
-    const images = gsap.utils.toArray('.gallery-container img');
-    
-    ScrollTrigger.create({
-        trigger: gallery,
-        start: "top 80%",
-        end: "bottom 20%",
-        onEnter: () => {
-            console.log('Gallery entered viewport');
-            gallery.classList.add('is-visible');
-            animateImages();
-        },
-        onLeave: () => {
-            console.log('Gallery left viewport');
-            gallery.classList.remove('is-visible');
-        },
-        onEnterBack: () => {
-            console.log('Gallery entered viewport (scrolling up)');
-            gallery.classList.add('is-visible');
-            animateImages();
-        },
-        onLeaveBack: () => {
-            console.log('Gallery left viewport (scrolling up)');
-            gallery.classList.remove('is-visible');
+        if (!modal || !modalImg || !modalDescription) {
+            console.error('Modal elements not found');
+            return;
         }
-    });
 
-    function animateImages() {
+        modalImg.src = ImageManager.buildImageUrl(image.src);
+        modalImg.alt = image.title;
+        modalDescription.innerHTML = `<h3>${image.title}</h3><p>${image.description}</p>`;
+        modal.style.display = 'block';
+    },
+
+    setupGalleryAnimations() {
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+            console.warn('GSAP or ScrollTrigger not loaded');
+            return;
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const gallery = document.querySelector('.gallery-container');
+        if (!gallery) return;
+
+        const images = gsap.utils.toArray('.gallery-container img');
+        
+        ScrollTrigger.create({
+            trigger: gallery,
+            start: "top 80%",
+            end: "bottom 20%",
+            onEnter: () => {
+                gallery.classList.add('is-visible');
+                this.animateImages(images);
+            },
+            onLeave: () => gallery.classList.remove('is-visible'),
+            onEnterBack: () => {
+                gallery.classList.add('is-visible');
+                this.animateImages(images);
+            },
+            onLeaveBack: () => gallery.classList.remove('is-visible')
+        });
+    },
+
+    animateImages(images) {
         images.forEach((img, index) => {
             gsap.fromTo(img, 
                 { scale: 0.8, opacity: 0 },
@@ -617,114 +734,134 @@ function setupGalleryAnimations() {
                     opacity: 1, 
                     duration: 0.5, 
                     ease: "power2.out",
-                    delay: index * 0.1,
-                    onStart: () => console.log(`Image ${index + 1} animation started`)
+                    delay: index * 0.1
                 }
             );
         });
-    }
+    },
 
-    console.log(`Found ${images.length} images in the gallery`);
-}
+    setupGalleryModal() {
+        const modal = DOMManager.getElement('imageModal');
+        const closeBtn = modal.querySelector('.close');
 
-function setupGalleryModal() {
-    const modal = getElement('imageModal');
-    const closeBtn = modal.querySelector('.close');
-
-    closeBtn.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
+        EventManager.add(closeBtn, 'click', () => {
             modal.style.display = "none";
-        }
-    }
-}
-
-function setupFilters() {
-    setupFilterButtons('.benefits-nav', '#services-list', '.service-item');
-    setupFilterButtons('.package-nav', '#package-list', '.package-item');
-}
-
-function setupFilterButtons(navSelector, listSelector, itemSelector) {
-    const filterButtons = document.querySelectorAll(`${navSelector} button`);
-    const items = document.querySelectorAll(itemSelector);
-
-    filterButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const filter = button.querySelector('.hidden-text').textContent.toLowerCase().replace(/\s+/g, '-');
-            
-            // Actualizar botones activos
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            // Filtrar elementos
-            items.forEach(item => {
-                if (filter === 'all' || item.classList.contains(filter)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
         });
-    });
-}
 
-// Manejo de errores de carga de imágenes
-document.querySelectorAll('img').forEach(img => {
-    img.addEventListener('error', function() {
-        this.src = 'https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/error.webp';
-    });
-});
-
-// Inicialización del carrusel
-function initCarousel() {
-    console.log('Initializing carousel');
-    const carousel = document.getElementById('carrusel-container');
-    if (!carousel) {
-        console.error('Carousel element not found');
-        return;
+        EventManager.add(window, 'click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
     }
-    console.log('Carousel element found:', carousel);
+};
 
-    const items = carousel.querySelectorAll('.carousel-item');
-    if (items.length === 0) {
-        console.error('No carousel items found');
-        return;
-    }
-    console.log('Number of carousel items:', items.length);
+// Controlador de Carousel
+const CarouselController = {
+    async loadCarouselContent() {
+        try {
+            const response = await fetch('carrusel.html');
+            const data = await response.text();
+            const container = DOMManager.getElement('carrusel-container');
+            if (container) {
+                container.innerHTML = data;
+                setTimeout(() => this.initCarousel(), 500);
+            }
+        } catch (error) {
+            console.error('Error loading carousel:', error);
+        }
+    },
 
-    const prevBtn = carousel.querySelector('.carousel-control.prev');
-    const nextBtn = carousel.querySelector('.carousel-control.next');
-    if (!prevBtn || !nextBtn) {
-        console.error('Carousel control buttons not found');
-        return;
-    }
+    async loadPaqcarrContent() {
+        try {
+            const response = await fetch('paqcarr.html');
+            const data = await response.text();
+            const container = DOMManager.getElement('paqcarr-container');
+            if (container) {
+                container.innerHTML = data;
+                this.initPaqcarr();
+            }
+        } catch (error) {
+            console.error('Error loading paqcarr:', error);
+        }
+    },
 
-    const itemWidth = items[0].offsetWidth;
-    console.log('Item width:', itemWidth);
-    let currentIndex = 0;
+    initCarousel() {
+        const carousel = DOMManager.getElement('carrusel-container');
+        if (!carousel) return;
 
-    function showSlide(index) {
-        const carouselList = carousel.querySelector('.carousel');
-        carouselList.style.transform = `translateX(-${index * itemWidth}px)`;
-        currentIndex = index;
-        console.log('Current index:', currentIndex);
-        updateIndicators(index);
-    }
+        const items = carousel.querySelectorAll('.carousel-item');
+        if (items.length === 0) return;
 
-    function nextSlide() {
-        console.log('Next slide clicked');
-        showSlide((currentIndex + 1) % items.length);
-    }
+        const prevBtn = carousel.querySelector('.carousel-control.prev');
+        const nextBtn = carousel.querySelector('.carousel-control.next');
+        if (!prevBtn || !nextBtn) return;
 
-    function prevSlide() {
-        console.log('Previous slide clicked');
-        showSlide((currentIndex - 1 + items.length) % items.length);
-    }
+        const itemWidth = items[0].offsetWidth;
+        let currentIndex = 0;
 
-    function updateIndicators(index) {
+        const showSlide = (index) => {
+            const carouselList = carousel.querySelector('.carousel');
+            carouselList.style.transform = `translateX(-${index * itemWidth}px)`;
+            currentIndex = index;
+            this.updateIndicators(carousel, index);
+        };
+
+        EventManager.add(nextBtn, 'click', () => {
+            showSlide((currentIndex + 1) % items.length);
+        });
+
+        EventManager.add(prevBtn, 'click', () => {
+            showSlide((currentIndex - 1 + items.length) % items.length);
+        });
+
+        // Setup indicators
+        const indicators = carousel.querySelectorAll('.carousel-indicators button');
+        indicators.forEach((indicator, index) => {
+            EventManager.add(indicator, 'click', () => showSlide(index));
+        });
+
+        // Update image sources
+        items.forEach(item => {
+            const img = item.querySelector('img');
+            if (img) {
+                const originalSrc = img.getAttribute('src');
+                img.src = `${CONFIG.CAROUSEL_IMAGE_BASE_URL}${originalSrc}`;
+            }
+        });
+
+        // Initialize carousel
+        showSlide(0);
+
+        // Keyboard navigation
+        EventManager.add(carousel, 'keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                showSlide((currentIndex + 1) % items.length);
+            } else if (e.key === 'ArrowLeft') {
+                showSlide((currentIndex - 1 + items.length) % items.length);
+            }
+        });
+
+// Touch navigation (continuación)
+        let touchstartX = 0;
+        let touchendX = 0;
+
+        EventManager.add(carousel, 'touchstart', (e) => {
+            touchstartX = e.changedTouches[0].screenX;
+        });
+
+        EventManager.add(carousel, 'touchend', (e) => {
+            touchendX = e.changedTouches[0].screenX;
+            if (touchendX < touchstartX) {
+                showSlide((currentIndex + 1) % items.length);
+            }
+            if (touchendX > touchstartX) {
+                showSlide((currentIndex - 1 + items.length) % items.length);
+            }
+        });
+    },
+
+    updateIndicators(carousel, index) {
         const indicators = carousel.querySelectorAll('.carousel-indicators button');
         indicators.forEach((indicator, i) => {
             if (i === index) {
@@ -736,182 +873,230 @@ function initCarousel() {
             }
         });
     }
+};
 
-    nextBtn.addEventListener('click', nextSlide);
-    prevBtn.addEventListener('click', prevSlide);
+// Controlador de navegación responsive
+const ResponsiveController = {
+    init() {
+        this.setupResponsiveNavigation();
+        this.setupScrollHandling();
+        this.setupResizeHandling();
+        this.initializeMediaQueries();
+    },
 
-    // Configurar indicadores
-    const indicators = carousel.querySelectorAll('.carousel-indicators button');
-    indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => showSlide(index));
-    });
+    setupResponsiveNavigation() {
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            EventManager.add(link, 'click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = DOMManager.getElement(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    },
 
+    setupScrollHandling() {
+        let lastScroll = 0;
+        const header = DOMManager.getElement('main-header');
+        const fixedBar = document.querySelector('.fixed-bar');
 
-    // Continuación de la función initCarousel
-    items.forEach(item => {
-        const img = item.querySelector('img');
-        if (img) {
-            const originalSrc = img.getAttribute('src');
-            img.src = `${CAROUSEL_IMAGE_BASE_URL}${originalSrc}`;
+        EventManager.add(window, 'scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            // Header visibility
+            if (header) {
+                header.classList.toggle('scrolled', currentScroll > 100);
+                header.classList.toggle('header-hidden', currentScroll > lastScroll && currentScroll > 200);
+            }
+
+            // Fixed bar visibility
+            if (fixedBar) {
+                fixedBar.classList.toggle('bar-hidden', currentScroll < lastScroll);
+            }
+
+            lastScroll = currentScroll;
+        });
+    },
+
+    setupResizeHandling() {
+        const handleResize = () => {
+            const width = window.innerWidth;
+            document.body.classList.toggle('is-mobile', width < 768);
+            document.body.classList.toggle('is-tablet', width >= 768 && width < 1024);
+            document.body.classList.toggle('is-desktop', width >= 1024);
+            
+            this.adjustLayoutForScreenSize(width);
+        };
+
+        EventManager.add(window, 'resize', handleResize);
+        handleResize(); // Initial call
+    },
+
+    adjustLayoutForScreenSize(width) {
+        if (width < 768) {
+            this.optimizeForMobile();
+        } else if (width < 1024) {
+            this.optimizeForTablet();
+        } else {
+            this.optimizeForDesktop();
         }
-    });
+    },
 
-    // Iniciar el carrusel
-    showSlide(0);
-    console.log('Carousel initialization complete');
+    optimizeForMobile() {
+        // Ajustar tamaños de fuente para móvil
+        document.documentElement.style.setProperty('--base-font-size', '14px');
+        document.documentElement.style.setProperty('--heading-font-size', '1.5rem');
+        
+        // Optimizar espaciado
+        document.documentElement.style.setProperty('--container-padding', '10px');
+        document.documentElement.style.setProperty('--section-spacing', '30px');
+        
+        // Ajustar grid layouts
+        const grids = document.querySelectorAll('.services-grid, .gallery-grid, .package-grid');
+        grids.forEach(grid => {
+            grid.style.gridTemplateColumns = '1fr';
+            grid.style.gap = '15px';
+        });
+    },
 
-    // Añadir navegación con teclado
-    carousel.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowRight') {
-            nextSlide();
-        } else if (e.key === 'ArrowLeft') {
-            prevSlide();
+    optimizeForTablet() {
+        // Configuraciones para tablet
+        document.documentElement.style.setProperty('--base-font-size', '15px');
+        document.documentElement.style.setProperty('--heading-font-size', '1.75rem');
+        document.documentElement.style.setProperty('--container-padding', '20px');
+        document.documentElement.style.setProperty('--section-spacing', '40px');
+    },
+
+    optimizeForDesktop() {
+        // Restaurar configuraciones desktop
+        document.documentElement.style.setProperty('--base-font-size', '16px');
+        document.documentElement.style.setProperty('--heading-font-size', '2rem');
+        document.documentElement.style.setProperty('--container-padding', '30px');
+        document.documentElement.style.setProperty('--section-spacing', '60px');
+    },
+
+    initializeMediaQueries() {
+        // Observar cambios en el modo oscuro
+        const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        darkModeMediaQuery.addListener(e => this.handleDarkModeChange(e));
+        
+        // Observar cambios en la preferencia de movimiento reducido
+        const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        reducedMotionMediaQuery.addListener(e => this.handleReducedMotionChange(e));
+    },
+
+    handleDarkModeChange(e) {
+        document.body.classList.toggle('dark-mode', e.matches);
+    },
+
+    handleReducedMotionChange(e) {
+        document.body.classList.toggle('reduced-motion', e.matches);
+    }
+};
+
+// Inicialización de la aplicación
+const App = {
+    async init() {
+        if (AppState.initialized) {
+            console.warn('App already initialized');
+            return;
         }
-    });
 
-    // Añadir funcionalidad de swipe para dispositivos móviles
-    let touchstartX = 0;
-    let touchendX = 0;
+        try {
+            console.log('Initializing application...');
+            
+            // Inicializar controladores principales
+            ResponsiveController.init();
+            await ServicesController.loadServices();
+            PopupController.init();
+            GalleryController.init();
+            await CarouselController.loadCarouselContent();
+            await CarouselController.loadPaqcarrContent();
+            
+            // Configurar event listeners globales
+            this.setupGlobalEventListeners();
+            
+            // Optimizar imágenes
+            this.setupLazyLoading();
+            
+            AppState.initialized = true;
+            console.log('Application initialized successfully');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+            this.handleInitializationError(error);
+        }
+    },
 
-    carousel.addEventListener('touchstart', e => {
-        touchstartX = e.changedTouches[0].screenX;
-    });
+    setupGlobalEventListeners() {
+        // Manejar errores de imagen globalmente
+        document.querySelectorAll('img').forEach(img => {
+            EventManager.add(img, 'error', () => ImageManager.handleImageError(img));
+        });
 
-    carousel.addEventListener('touchend', e => {
-        touchendX = e.changedTouches[0].screenX;
-        handleSwipe();
-    });
-
-    function handleSwipe() {
-        if (touchendX < touchstartX) nextSlide();
-        if (touchendX > touchstartX) prevSlide();
-    }
-}
-
-// Función para cargar contenido dinámicamente
-function loadDynamicContent(url, containerId) {
-    fetch(url)
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById(containerId).innerHTML = data;
-            if (containerId === 'carrusel-container') {
-                initCarousel();
-            }
-        })
-        .catch(error => console.error(`Error loading content for ${containerId}:`, error));
-}
-
-// Función para manejar la navegación del sitio
-function setupNavigation() {
-    const navLinks = document.querySelectorAll('nav a');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
+        // Manejar cierre de popups con Escape
+        EventManager.add(document, 'keydown', (e) => {
+            if (e.key === 'Escape') {
+                const popup = DOMManager.getElement('popup');
+                const imageModal = DOMManager.getElement('imageModal');
+                if (popup) popup.style.display = 'none';
+                if (imageModal) imageModal.style.display = 'none';
             }
         });
-    });
-}
+    },
 
-// Función para implementar lazy loading de imágenes
-function setupLazyLoading() {
-    const images = document.querySelectorAll('img[data-src]');
-    const config = {
-        rootMargin: '0px 0px 50px 0px',
-        threshold: 0
-    };
+    setupLazyLoading() {
+        const imageObserver = new IntersectionObserver(
+            (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                        observer.unobserve(img);
+                    }
+                });
+            },
+            { rootMargin: '50px' }
+        );
 
-    let observer = new IntersectionObserver((entries, self) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                preloadImage(entry.target);
-                self.unobserve(entry.target);
-            }
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
         });
-    }, config);
+    },
 
-    images.forEach(image => {
-        observer.observe(image);
-    });
-}
+    handleInitializationError(error) {
+        const mainContainer = DOMManager.getElement('main');
+        if (mainContainer) {
+            mainContainer.innerHTML = `
+                <div class="error-container">
+                    <h2>Lo sentimos, ha ocurrido un error</h2>
+                    <p>Por favor, intente recargar la página</p>
+                    <button onclick="location.reload()">Recargar página</button>
+                </div>
+            `;
+        }
+    },
 
-function preloadImage(img) {
-    const src = img.getAttribute('data-src');
-    if (!src) return;
-    img.src = src;
-}
-
-// Función para manejar el formulario de contacto
-function setupContactForm() {
-    const form = document.getElementById('contact-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Aquí iría la lógica para enviar el formulario, por ejemplo usando fetch
-            console.log('Formulario enviado');
-            // Resetear el formulario después del envío
-            form.reset();
-        });
+    cleanup() {
+        EventManager.removeAll();
+        AppState.initialized = false;
+        console.log('Application cleanup completed');
     }
-}
+};
 
-// Función principal de inicialización
-function init() {
-    loadJSONData();
-    setupPopup();
-    setupGalleryAnimations();
-    setupGalleryModal();
-    setupGallery();
-    loadDynamicContent('carrusel.html', 'carrusel-container');
-    loadDynamicContent('paqcarr.html', 'paqcarr-container');
-    setupNavigation();
-    setupLazyLoading();
-    setupContactForm();
-    setupServiceCategories();
-    setupFilters();
-}
+// Inicialización cuando el DOM está listo
+document.addEventListener('DOMContentLoaded', () => App.init());
 
-// Ejecutar la función de inicialización cuando el DOM esté completamente cargado
-document.addEventListener('DOMContentLoaded', init);
+// Limpieza cuando la página se descarga
+window.addEventListener('unload', () => App.cleanup());
 
-// Función para manejar el scroll y aplicar efectos
-function handleScroll() {
-    const scrollPosition = window.scrollY;
-    const header = document.getElementById('main-header');
-
-    if (scrollPosition > 100) {
-        header.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
-    }
-
-    // Añadir más efectos de scroll aquí si es necesario
-}
-
-// Escuchar el evento de scroll
-window.addEventListener('scroll', handleScroll);
-
-// Función para manejar la adaptación a diferentes tamaños de pantalla
-function handleResize() {
-    const width = window.innerWidth;
-    if (width < 768) {
-        // Lógica para dispositivos móviles
-    } else if (width < 1024) {
-        // Lógica para tablets
-    } else {
-        // Lógica para desktops
-    }
-}
-
-// Escuchar el evento de resize
-window.addEventListener('resize', handleResize);
-
-// Llamar a handleResize inicialmente para configurar el layout correcto
-handleResize();
-
-// Exportar funciones públicas si es necesario
-window.initCarousel = initCarousel;
-window.loadDynamicContent = loadDynamicContent;
+// Exportar para uso externo
+window.App = App;
