@@ -1,91 +1,83 @@
 // carrusel.js
 document.addEventListener('DOMContentLoaded', function() {
     loadCarouselContent();
+    loadPaqcarrContent();
 });
 
+// Cargar el contenido del primer carrusel
 function loadCarouselContent() {
     fetch('carrusel.html')
         .then(response => response.text())
         .then(data => {
             document.getElementById('carrusel-container').innerHTML = data;
-            // Use a small delay to ensure the content is rendered before initializing
-            setTimeout(initCarousel, 100);
+            setTimeout(initImageNav, 100, 'carrusel-container');
         })
         .catch(error => console.error('Error loading carousel:', error));
 }
 
-function initCarousel() {
-    const carousel = document.getElementById('carrusel-container');
-    if (!carousel) {
-        console.error('Carousel element not found');
+// Cargar el contenido del segundo carrusel
+function loadPaqcarrContent() {
+    fetch('paqcarr.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('paqcarr-container').innerHTML = data;
+            setTimeout(initImageNav, 100, 'paqcarr-container');
+        })
+        .catch(error => console.error('Error loading paqcarr:', error));
+}
+
+// Función de inicialización para ambos carruseles
+function initImageNav(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error(`Container ${containerId} not found`);
         return;
     }
 
-    const items = carousel.querySelectorAll('.carousel-item');
-    if (items.length === 0) {
-        console.error('No carousel items found');
+    const imageNavItems = container.querySelectorAll('.image-nav-item');
+    if (imageNavItems.length === 0) {
+        console.error(`No image nav items found in ${containerId}`);
         return;
     }
 
-    console.log(`Found ${items.length} carousel items`);
-
-    const prevBtn = carousel.querySelector('.carousel-control.prev');
-    const nextBtn = carousel.querySelector('.carousel-control.next');
-    if (!prevBtn || !nextBtn) {
-        console.error('Carousel control buttons not found');
-        return;
+    const mainImageContainer = container.querySelector('.main-image-container');
+    if (!mainImageContainer) {
+        // Crear el contenedor de imagen principal si no existe
+        const newMainContainer = document.createElement('div');
+        newMainContainer.className = 'main-image-container';
+        newMainContainer.innerHTML = `
+            <img src="" alt="" class="main-image">
+            <div class="image-info">
+                <h3></h3>
+                <p></p>
+            </div>
+        `;
+        container.insertBefore(newMainContainer, container.firstChild);
     }
 
-    const itemWidth = items[0].offsetWidth;
-    let currentIndex = 0;
+    // Manejar clics en los elementos de navegación
+    imageNavItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Remover clase activa de todos los items
+            imageNavItems.forEach(i => i.classList.remove('active'));
+            
+            // Añadir clase activa al item seleccionado
+            this.classList.add('active');
 
-    function showSlide(index) {
-        const carouselList = carousel.querySelector('.carousel');
-        carouselList.style.transform = `translateX(-${index * itemWidth}px)`;
-        currentIndex = index;
-        updateIndicators(index);
-    }
-
-    function nextSlide() {
-        showSlide((currentIndex + 1) % items.length);
-    }
-
-    function prevSlide() {
-        showSlide((currentIndex - 1 + items.length) % items.length);
-    }
-
-    function updateIndicators(index) {
-        const indicators = carousel.querySelectorAll('.carousel-indicators button');
-        indicators.forEach((indicator, i) => {
-            if (i === index) {
-                indicator.classList.add('active');
-                indicator.setAttribute('aria-current', 'true');
-            } else {
-                indicator.classList.remove('active');
-                indicator.removeAttribute('aria-current');
-            }
+            // Actualizar imagen principal y texto
+            const mainImage = container.querySelector('.main-image');
+            const imageInfo = container.querySelector('.image-info');
+            
+            mainImage.src = this.getAttribute('data-image');
+            mainImage.alt = this.getAttribute('data-title');
+            
+            imageInfo.innerHTML = `
+                <h3>${this.getAttribute('data-title')}</h3>
+                <p>${this.getAttribute('data-description')}</p>
+            `;
         });
-    }
-
-    nextBtn.addEventListener('click', nextSlide);
-    prevBtn.addEventListener('click', prevSlide);
-
-    // Configurar indicadores
-    const indicators = carousel.querySelectorAll('.carousel-indicators button');
-    indicators.forEach((indicator, index) => {
-        indicator.addEventListener('click', () => showSlide(index));
     });
 
-    // Añadir navegación con teclado
-    carousel.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowRight') {
-            nextSlide();
-        } else if (e.key === 'ArrowLeft') {
-            prevSlide();
-        }
-    });
-
-    // Iniciar el carrusel
-    showSlide(0);
-    console.log('Carousel initialized');
+    // Activar el primer elemento por defecto
+    imageNavItems[0].click();
 }
