@@ -1437,3 +1437,198 @@ const FilterController = {
         });
     }
 };
+// Inicialización de la aplicación
+const App = {
+    async init() {
+        if (AppState.initialized) {
+            console.warn('App already initialized');
+            return;
+        }
+
+        try {
+            PerformanceMonitor.startMeasure('app-init');
+            console.log('Initializing application...');
+            
+            // Initialize core functionality
+            ResponsiveController.init();
+            await ServicesController.loadServices();
+            PopupController.init();
+            GalleryController.init();
+            await CarouselController.loadCarouselContent();
+            await CarouselController.loadPaqcarrContent();
+            
+            // Initialize additional features
+            FilterController.init();
+            AnimationController.init();
+            
+            // Setup global listeners and features
+            this.setupGlobalEventListeners();
+            this.setupLazyLoading();
+            await ServiceWorkerManager.register();
+            
+            AppState.initialized = true;
+            
+            const initDuration = PerformanceMonitor.endMeasure('app-init');
+            PerformanceMonitor.logPerformance('app-init', initDuration);
+            
+            console.log('Application initialized successfully');
+            AnalyticsManager.trackEvent('App', 'initialization', 'success');
+        } catch (error) {
+            console.error('Error during initialization:', error);
+            ErrorHandler.log(error, 'App initialization');
+            this.handleInitializationError(error);
+            AnalyticsManager.trackEvent('App', 'initialization', 'error');
+        }
+    },
+
+    setupGlobalEventListeners() {
+        // Manejo de errores de imágenes
+        document.querySelectorAll('img').forEach(img => {
+            EventManager.add(img, 'error', () => ImageManager.handleImageError(img));
+        });
+
+        // Manejo de teclas globales
+        EventManager.add(document, 'keydown', (e) => {
+            if (e.key === 'Escape') {
+                const popup = DOMManager.getElement('popup');
+                const imageModal = DOMManager.getElement('imageModal');
+                if (popup) popup.style.display = 'none';
+                if (imageModal) imageModal.style.display = 'none';
+            }
+        });
+
+        // Manejo de carga de página
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            if (location.hash) {
+                const targetElement = document.querySelector(location.hash);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            AnalyticsManager.trackPageView(window.location.pathname);
+        });
+
+        // Manejo de redimensionamiento de ventana
+        window.addEventListener('resize', Utils.debounce(() => {
+            ResponsiveController.handleResize();
+        }, 250));
+
+        // Manejo de errores globales
+        window.addEventListener('error', (event) => {
+            ErrorHandler.log(event.error, 'Global error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            ErrorHandler.log(event.reason, 'Unhandled Promise rejection');
+        });
+    },
+
+    setupLazyLoading() {
+        const imageObserver = new IntersectionObserver(
+            (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            AnalyticsManager.trackEvent('Image', 'lazy-load', img.src);
+                        }
+                        observer.unobserve(img);
+                    }
+                });
+            },
+            { rootMargin: '50px' }
+        );
+
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    },
+
+    handleInitializationError(error) {
+        const mainContainer = DOMManager.getElement('main');
+        if (mainContainer) {
+            mainContainer.innerHTML = `
+                <div class="error-container">
+                    <h2>Lo sentimos, ha ocurrido un error</h2>
+                    <p>Por favor, intente recargar la página</p>
+                    <button onclick="location.reload()">Recargar página</button>
+                </div>
+            `;
+        }
+    },
+
+    cleanup() {
+        // Limpieza de recursos
+        EventManager.removeAll();
+        CacheManager.clear();
+        ErrorHandler.clearErrors();
+        
+        // Desregistrar Service Worker si es necesario
+        if (CONFIG.DEBUG) {
+            ServiceWorkerManager.unregister();
+        }
+        
+        AppState.initialized = false;
+        console.log('Application cleanup completed');
+    }
+};
+
+// Initialize app when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    App.init().catch(error => {
+        ErrorHandler.log(error, 'App initialization');
+        ErrorHandler.showErrorMessage(
+            'Ha ocurrido un error al cargar la aplicación. Por favor, recarga la página.',
+            document.body
+        );
+    });
+});
+
+// Cleanup on page unload
+window.addEventListener('unload', () => App.cleanup());
+
+// Export to window object
+Object.assign(window, {
+    // Configuración y estado
+    CONFIG,
+    AppState,
+    
+    // Gestores base
+    EventManager,
+    ImageManager,
+    DOMManager,
+    
+    // Sistemas y utilidades
+    CacheManager,
+    Utils,
+    ErrorHandler,
+    TemplateManager,
+    AnalyticsManager,
+    PerformanceMonitor,
+    ServiceWorkerManager,
+    
+    // Controladores principales
+    App,
+    ServicesController,
+    UIController,
+    PopupController,
+    CarouselController,
+    GalleryController,
+    FilterController,
+    AnimationController,
+    ResponsiveController
+});
+
+// Exportar versión y tiempo de compilación
+Object.defineProperty(window, 'APP_VERSION', {
+    value: '1.0.0',
+    writable: false
+});
+
+Object.defineProperty(window, 'BUILD_TIME', {
+    value: new Date().toISOString(),
+    writable: false
+});
