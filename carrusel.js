@@ -1,83 +1,118 @@
 // carrusel.js
 document.addEventListener('DOMContentLoaded', function() {
-    loadCarouselContent();
-    loadPaqcarrContent();
+    initializeCarousels();
 });
 
-// Cargar el contenido del primer carrusel
-function loadCarouselContent() {
-    fetch('carrusel.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('carrusel-container').innerHTML = data;
-            setTimeout(initImageNav, 100, 'carrusel-container');
-        })
-        .catch(error => console.error('Error loading carousel:', error));
+async function initializeCarousels() {
+    try {
+        // Cargar primer carrusel
+        if (document.getElementById('carrusel-container')) {
+            await loadCarouselContent();
+        }
+        
+        // Cargar segundo carrusel
+        if (document.getElementById('paqcarr-container')) {
+            await loadPaqcarrContent();
+        }
+    } catch (error) {
+        console.error('Error initializing carousels:', error);
+    }
 }
 
-// Cargar el contenido del segundo carrusel
-function loadPaqcarrContent() {
-    fetch('paqcarr.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('paqcarr-container').innerHTML = data;
-            setTimeout(initImageNav, 100, 'paqcarr-container');
-        })
-        .catch(error => console.error('Error loading paqcarr:', error));
+async function loadCarouselContent() {
+    try {
+        const response = await fetch('carrusel.html');
+        const data = await response.text();
+        const container = document.getElementById('carrusel-container');
+        if (container) {
+            container.innerHTML = data;
+            initCarousel('carrusel-container');
+        }
+    } catch (error) {
+        console.error('Error loading carousel:', error);
+    }
 }
 
-// Función de inicialización para ambos carruseles
-function initImageNav(containerId) {
+async function loadPaqcarrContent() {
+    try {
+        const response = await fetch('paqcarr.html');
+        const data = await response.text();
+        const container = document.getElementById('paqcarr-container');
+        if (container) {
+            container.innerHTML = data;
+            initCarousel('paqcarr-container');
+        }
+    } catch (error) {
+        console.error('Error loading paqcarr:', error);
+    }
+}
+
+function initCarousel(containerId) {
     const container = document.getElementById(containerId);
-    if (!container) {
-        console.error(`Container ${containerId} not found`);
-        return;
-    }
+    if (!container) return;
 
-    const imageNavItems = container.querySelectorAll('.image-nav-item');
-    if (imageNavItems.length === 0) {
-        console.error(`No image nav items found in ${containerId}`);
-        return;
-    }
+    const navItems = container.querySelectorAll('.image-nav-item');
+    if (!navItems.length) return;
 
-    const mainImageContainer = container.querySelector('.main-image-container');
+    // Crear el contenedor de imagen principal si no existe
+    let mainImageContainer = container.querySelector('.main-image-container');
     if (!mainImageContainer) {
-        // Crear el contenedor de imagen principal si no existe
-        const newMainContainer = document.createElement('div');
-        newMainContainer.className = 'main-image-container';
-        newMainContainer.innerHTML = `
-            <img src="" alt="" class="main-image">
+        mainImageContainer = document.createElement('div');
+        mainImageContainer.className = 'main-image-container';
+        mainImageContainer.innerHTML = `
+            <img class="main-image" alt="">
             <div class="image-info">
-                <h3></h3>
-                <p></p>
+                <h3 class="image-title"></h3>
+                <p class="image-description"></p>
             </div>
         `;
-        container.insertBefore(newMainContainer, container.firstChild);
+        container.insertBefore(mainImageContainer, container.firstChild);
     }
 
-    // Manejar clics en los elementos de navegación
-    imageNavItems.forEach(item => {
-        item.addEventListener('click', function() {
-            // Remover clase activa de todos los items
-            imageNavItems.forEach(i => i.classList.remove('active'));
-            
-            // Añadir clase activa al item seleccionado
-            this.classList.add('active');
+    // Elementos principales
+    const mainImage = mainImageContainer.querySelector('.main-image');
+    const imageTitle = mainImageContainer.querySelector('.image-title');
+    const imageDescription = mainImageContainer.querySelector('.image-description');
 
-            // Actualizar imagen principal y texto
-            const mainImage = container.querySelector('.main-image');
-            const imageInfo = container.querySelector('.image-info');
-            
-            mainImage.src = this.getAttribute('data-image');
-            mainImage.alt = this.getAttribute('data-title');
-            
-            imageInfo.innerHTML = `
-                <h3>${this.getAttribute('data-title')}</h3>
-                <p>${this.getAttribute('data-description')}</p>
-            `;
-        });
+    function updateMainImage(item) {
+        if (!item) return;
+
+        const imageSrc = item.getAttribute('data-image');
+        const title = item.getAttribute('data-title');
+        const description = item.getAttribute('data-description');
+
+        mainImage.src = imageSrc;
+        mainImage.alt = title;
+        imageTitle.textContent = title;
+        imageDescription.textContent = description;
+
+        // Actualizar estado activo
+        navItems.forEach(navItem => navItem.classList.remove('active'));
+        item.classList.add('active');
+    }
+
+    // Eventos de clic
+    navItems.forEach(item => {
+        item.addEventListener('click', () => updateMainImage(item));
     });
 
-    // Activar el primer elemento por defecto
-    imageNavItems[0].click();
+    // Navegación con teclado
+    container.addEventListener('keydown', (e) => {
+        const activeItem = container.querySelector('.image-nav-item.active');
+        if (!activeItem) return;
+
+        let nextItem;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            nextItem = activeItem.nextElementSibling || navItems[0];
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            nextItem = activeItem.previousElementSibling || navItems[navItems.length - 1];
+        }
+
+        if (nextItem) {
+            updateMainImage(nextItem);
+        }
+    });
+
+    // Inicializar con el primer elemento
+    updateMainImage(navItems[0]);
 }
