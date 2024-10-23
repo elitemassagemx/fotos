@@ -32,7 +32,22 @@ const CONFIG = {
         MIN_SWIPE_DISTANCE: 50
     }
 };
+// Sistema de Analytics
+const AnalyticsManager = {
+    trackEvent(category, action, label = '') {
+        if (CONFIG.DEBUG) {
+            console.log(`[Analytics] ${category}: ${action} - ${label}`);
+        }
+        // Aquí iría la implementación real de analytics
+    },
 
+    trackPageView(path) {
+        if (CONFIG.DEBUG) {
+            console.log(`[Analytics] Pageview: ${path}`);
+        }
+        // Aquí iría la implementación real de pageview
+    }
+};
 // Gestor de estado de la aplicación
 const AppState = {
     services: {},
