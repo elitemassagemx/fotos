@@ -24,25 +24,19 @@
     
     <!-- Favicons -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.webp">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.webp">
-    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.webp">
-    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.webp">
     <link rel="apple-touch-icon" href="apple-touch-icon.webp">
-    
-    <!-- Web Manifest -->
     <link rel="manifest" href="site.webmanifest">
 </head>
 <body>
     <!-- Header -->
-    <header id="main-header" class="fixed-header" role="banner">
+    <header id="main-header" class="fixed-header">
         <div class="container">
             <div class="header-top">
                 <div class="logo-container">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/logo.webp" 
+                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/logo.webp" 
                          alt="Elite Massage Logo" 
                          class="logo" 
-                         onerror="this.onerror=null; this.src='https://elitemassagemx.github.io/Home/IMG/fallback-logo.webp';">
+                         onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/fallback-logo.webp';">
                     <h1>Elite Massage</h1>
                 </div>
             </div>
@@ -50,7 +44,7 @@
     </header>
 
     <!-- Main Content -->
-    <main role="main">
+    <main>
         <!-- Hero Section -->
         <section id="inicio" class="section hero">
             <div class="container">
@@ -63,8 +57,8 @@
         <section id="carrusel-elite" class="section carrusel-section">
             <div class="container">
                 <h2>Personaliza tu estancia</h2>
-                <div id="carrusel-container">
-                    <!-- Dynamic carousel content -->
+                <div id="carrusel-container" class="carousel-container">
+                    <!-- Carousel content will be loaded dynamically -->
                 </div>
             </div>
         </section>
@@ -73,36 +67,52 @@
         <section id="servicios" class="section services">
             <div class="container">
                 <h2>Nuestros Servicios</h2>
+                
+                <!-- Category Toggle -->
                 <div class="service-category-toggle">
-                    <input type="radio" id="masajes1" name="category1" value="masajes" checked>
-                    <label for="masajes1">
-                        <img src="https://elitemassagemx.github.io/Home/IMG/recomend.webp" alt="Icono Masajes" class="category-icon">
+                    <input type="radio" id="masajes" name="category" value="masajes" checked>
+                    <label for="masajes">
+                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/recomend.webp" alt="Icono Masajes" class="category-icon">
                         Masajes
                     </label>
                     
-                    <input type="radio" id="experiencias1" name="category1" value="experiencias">
-                    <label for="experiencias1">
-                        <img src="https://elitemassagemx.github.io/Home/IMG/personal.webp" alt="Icono Experiencias" class="category-icon">
+                    <input type="radio" id="experiencias" name="category" value="experiencias">
+                    <label for="experiencias">
+                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/personal.webp" alt="Icono Experiencias" class="category-icon">
                         Experiencias
                     </label>
                     
-                    <input type="radio" id="paquetes1" name="category1" value="paquetes">
-                    <label for="paquetes1">
-                        <img src="https://elitemassagemx.github.io/Home/IMG/paqp.webp" alt="Icono Paquetes" class="category-icon">
+                    <input type="radio" id="paquetes" name="category" value="paquetes">
+                    <label for="paquetes">
+                        <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/paqp.webp" alt="Icono Paquetes" class="category-icon">
                         Paquetes
                     </label>
-                    
-                    <a href="tuplan.html" class="personaliza-link">
-                        <img src="https://elitemassagemx.github.io/Home/IMG/perso.webp" alt="Icono Personaliza" class="category-icon">
-                        Personaliza
-                    </a>
                 </div>
                 
+                <!-- Benefits Navigation -->
                 <div class="benefits-nav">
-                    <!-- Dynamic benefits navigation -->
+                    <!-- Benefits buttons will be loaded dynamically -->
                 </div>
                 
-                <div id="services-list" class="services-grid"></div>
+                <!-- Services Grid -->
+                <div class="services-container">
+                    <div id="services-grid" class="services-grid">
+                        <!-- Services will be loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Packages Section -->
+        <section id="paquetes-section" class="section packages">
+            <div class="container">
+                <h2>Paquetes Especiales</h2>
+                <div class="package-nav">
+                    <!-- Package navigation will be loaded dynamically -->
+                </div>
+                <div id="package-list" class="package-grid">
+                    <!-- Packages will be loaded dynamically -->
+                </div>
             </div>
         </section>
 
@@ -111,205 +121,137 @@
             <div class="container">
                 <h2>Inspírate con nuestras opciones</h2>
                 <div class="gallery-grid">
-                    <!-- Dynamic gallery content -->
+                    <!-- Gallery items will be loaded dynamically -->
                 </div>
-                <a href="galeria.html" class="btn btn-primary">Ver más</a>
+                <button id="ver-mas-galeria" class="btn btn-primary">Ver más</button>
             </div>
         </section>
 
-<!-- Reemplaza la sección actual de paquetes con este código -->
-<section id="paquetes" class="section packages">
-    <div class="container">
-        <h2>Nuestros Servicios</h2>
-        
-        <!-- Navegación principal de categorías -->
-        <div class="service-category-toggle">
-            <input type="radio" id="masajes2" name="category2" value="masajes" checked>
-            <label for="masajes2">
-                <img src="https://elitemassagemx.github.io/Home/IMG/recomend.webp" alt="Icono Masajes" class="category-icon">
-                Masajes
-            </label>
-            
-            <input type="radio" id="experiencias2" name="category2" value="experiencias">
-            <label for="experiencias2">
-                <img src="https://elitemassagemx.github.io/Home/IMG/personal.webp" alt="Icono Experiencias" class="category-icon">
-                Experiencias
-            </label>
-            
-            <input type="radio" id="paquetes2" name="category2" value="paquetes">
-            <label for="paquetes2">
-                <img src="https://elitemassagemx.github.io/Home/IMG/paqp.webp" alt="Icono Paquetes" class="category-icon">
-                Paquetes
-            </label>
-        </div>
-
-        <!-- Barra de navegación de beneficios -->
-        <div class="benefits-nav" id="benefits-nav">
-            <!-- Los iconos se generarán dinámicamente -->
-        </div>
-
-        <!-- Contenedor de servicios -->
-        <div class="services-container">
-            <div id="services-grid" class="services-grid">
-                <!-- Los servicios se generarán dinámicamente -->
-            </div>
-        </div>
-    </div>
-</section>
-        
         <!-- Testimonials Section -->
         <section id="testimonios" class="section testimonials">
             <div class="container">
                 <h2>Lo que dicen nuestros clientes</h2>
-                <div class="testimonial">
-                    <p>"Una experiencia increíble. El masaje de aromaterapia fue justo lo que necesitaba para relajarme completamente. ¡Volveré pronto!"</p>
-                    <p class="author">- María G.</p>
-                </div>
-                <div class="testimonial">
-                    <p>"El paquete en pareja fue maravilloso. El ambiente, el servicio y los masajes superaron nuestras expectativas. Totalmente recomendado."</p>
-                    <p class="author">- Carlos y Ana</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Us Section -->
-        <section id="conocenos" class="section gallery gallery-container">
-            <div class="container">
-                <div class="conocenos-header">
-                    <h3>Conócenos</h3>
-                    <a href="galeria.html" id="ver-mas-galeria" class="ver-mas-btn">Ver más</a>
-                </div>
-                <div class="gallery-grid">
-                    <!-- Dynamic gallery grid content -->
+                <div class="testimonials-grid">
+                    <div class="testimonial">
+                        <p>"Una experiencia increíble. El masaje de aromaterapia fue justo lo que necesitaba para relajarme completamente. ¡Volveré pronto!"</p>
+                        <p class="author">- María G.</p>
+                    </div>
+                    <div class="testimonial">
+                        <p>"El paquete en pareja fue maravilloso. El ambiente, el servicio y los masajes superaron nuestras expectativas. Totalmente recomendado."</p>
+                        <p class="author">- Carlos y Ana</p>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer role="contentinfo">
+    <footer>
         <div class="container">
-            <p>&copy; 2024 Elite Massage. Todos los derechos reservados.</p>
-            <div class="social-media">
-                <a href="https://facebook.com/elitemassage" target="_blank" rel="noopener noreferrer">Facebook</a> |
-                <a href="https://instagram.com/elitemassage" target="_blank" rel="noopener noreferrer">Instagram</a> |
-                <a href="https://twitter.com/elitemassage" target="_blank" rel="noopener noreferrer">Twitter</a>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <p>WhatsApp: <a href="https://wa.me/5215640020305">56-4002-0305</a></p>
+                    <p>Email: info@elitemassage.mx</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <div class="social-links">
+                        <a href="https://facebook.com/elitemassage" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="https://instagram.com/elitemassage" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Elite Massage. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Fixed Navigation Bar -->
-    <nav class="fixed-bar" aria-label="Navegación principal">
+    <!-- Fixed Navigation -->
+    <nav class="fixed-bar">
         <ul>
             <li>
-                <a href="#servicios" aria-label="Ir a sección de masajes">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/dorado.webp" alt="" class="nav-icon">
-                    <span class="nav-text">Masajes y<br>Experiencias</span>
+                <a href="#servicios">
+                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/dorado.webp" alt="Servicios" class="nav-icon">
+                    <span>Servicios</span>
                 </a>
             </li>
             <li>
-                <a href="#paquetes" aria-label="Ir a sección de paquetes">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/paqp.webp" alt="" class="nav-icon">
-                    <span class="nav-text">Paquetes</span>
+                <a href="#paquetes-section">
+                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/paqp.webp" alt="Paquetes" class="nav-icon">
+                    <span>Paquetes</span>
                 </a>
             </li>
             <li>
-                <a href="tuplan.html" aria-label="Crear plan personalizado">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/idea.webp" alt="" class="nav-icon">
-                    <span class="nav-text">Tu Plan<br>Personalizado</span>
+                <a href="tuplan.html">
+                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/idea.webp" alt="Plan Personalizado" class="nav-icon">
+                    <span>Tu Plan</span>
                 </a>
             </li>
         </ul>
     </nav>
 
-    <!-- Popup Modal -->
-    <div id="popup" class="popup" aria-modal="true" role="dialog">
+    <!-- Popups and Modals -->
+    <div id="popup" class="popup">
         <div class="popup-content">
-            <span class="close" aria-label="Cerrar">&times;</span>
-            <h2 id="popup-title"></h2>
-            <img id="popup-image" src="" alt="Imagen del servicio">
+            <button class="close">&times;</button>
+            <img id="popup-image" src="" alt="">
+            <h3 id="popup-title"></h3>
             <p id="popup-description"></p>
-            <div class="popup-details">
-                <div class="popup-benefits">
-                    <!-- Dynamic benefits content -->
-                </div>
-                <div class="popup-includes">
-                    <!-- Dynamic includes content -->
-                </div>
-                <div class="popup-duration">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/duration-icon.webp" alt="" class="duration-icon">
-                    <span id="popup-duration"></span>
-                </div>
+            <div class="popup-benefits"></div>
+            <div class="popup-includes"></div>
+            <div class="popup-duration">
+                <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/duration-icon.webp" alt="" class="duration-icon">
+                <span id="popup-duration"></span>
             </div>
-            <a href="#" id="whatsapp-button" class="whatsapp-button">
-                <img src="https://elitemassagemx.github.io/Home/IMG/whatsapp.webp" alt="Whatsapp" class="logo" onerror="this.onerror=null; this.src='https://elitemassagemx.github.io/Home/IMG/fallback-logo.webp';">
-                Reserva ahora
-            </a>
+            <button id="whatsapp-button" class="whatsapp-button">
+                <i class="fab fa-whatsapp"></i>
+                Reservar por WhatsApp
+            </button>
         </div>
-    </div>
-
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal" aria-modal="true" role="dialog">
-        <span class="close" aria-label="Cerrar">&times;</span>
-        <img class="modal-content" id="modalImage" alt="Imagen ampliada">
-        <div id="modalDescription"></div>
     </div>
 
     <!-- Templates -->
     <template id="service-template">
         <div class="service-item">
-            <div class="service-background"></div>
+            <div class="service-image">
+                <img src="" alt="">
+            </div>
             <div class="service-content">
                 <div class="service-header">
                     <img class="service-icon" alt="">
                     <h3 class="service-title"></h3>
                 </div>
                 <p class="service-description"></p>
-                <div class="benefits-container">
-                    <!-- Dynamic benefits content -->
+                <div class="service-benefits"></div>
+                <div class="service-duration">
+                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/duration-icon.webp" alt="" class="duration-icon">
+                    <span></span>
                 </div>
-                <div class="duration-container">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/duration-icon.webp" alt="" class="duration-icon">
-                    <span class="service-duration"></span>
-                </div>
-                <div class="service-buttons">
-                    <button class="saber-mas-button">Saber más</button>
-                </div>
+                <button class="saber-mas-button">Saber más</button>
             </div>
         </div>
     </template>
 
-    <template id="package-template">
-        <div class="package-item">
-            <div class="package-background"></div>
-            <div class="package-content">
-                <h3 class="package-title"></h3>
-                <p class="package-description"></p>
-                <div class="package-includes">
-                    <strong>Incluye: </strong><span class="package-includes-list"></span>
-                </div>
-                <div class="package-duration">
-                    <img src="https://elitemassagemx.github.io/Home/IMG/duration-icon.webp" alt="" class="duration-icon">
-                    <span class="package-duration-text"></span>
-                </div>
-                <div class="package-benefits">
-                    <!-- Dynamic benefits content -->
-                </div>
-                <div class="package-buttons">
-                    <button class="saber-mas-button">Saber más</button>
-                </div>
-            </div>
-        </div>
-    </template>
-
-<!-- Scripts (continuación) -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/ScrollTrigger.min.js"></script>
     
-    <!-- Custom Scripts -->
+    <!-- Initialize App -->
+    <script>
+        // Configuración global
+        const CONFIG = {
+            BASE_URL: "https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/",
+            WHATSAPP_NUMBER: "5215640020305"
+        };
+    </script>
     <script src="script.js"></script>
     <script src="carrusel.js"></script>
-    <script src="paqcarr.js"></script>
 </body>
 </html>
