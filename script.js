@@ -3076,7 +3076,7 @@ Object.assign(window, {
     GalleryController,
     FilterController,
     AnimationController,
-    ResponsiveController
+    ResponsiveController,
 });
 
 // Exportar versión y tiempo de compilación
