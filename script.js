@@ -1,6 +1,6 @@
-// ==========================================
+
 // SISTEMA DE DEPENDENCIAS Y CONFIGURACIÓN
-// ==========================================
+
 
 const DEPENDENCIES = {
     GSAP: typeof gsap !== 'undefined',
