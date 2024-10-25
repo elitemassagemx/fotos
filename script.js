@@ -948,31 +948,7 @@ const ServicesController = {
         });
     },
 
-    setupEventListeners() {
-        EventManager.delegate(
-            document.body,
-            '.saber-mas-button',
-            'click',
-            (event, button) => {
-                const serviceElement = button.closest('.service-item, .package-item');
-                if (!serviceElement) return;
-
-                const index = Array.from(serviceElement.parentNode.children)
-                    .indexOf(serviceElement);
-                const isPackage = serviceElement.classList.contains('package-item');
-                
-                if (isPackage) {
-                    const packageData = AppState.services.paquetes[index];
-                    PopupController.showPopup(packageData, index, true);
-                } else {
-                    const service = AppState.services[AppState.currentCategory][index];
-                    PopupController.showPopup(service, index);
-                }
-            }
-        );
-    },
-
-    renderInitialServices() {
+        renderInitialServices() {
         PerformanceMonitor.startMeasure('renderServices');
         
         this.renderServices(AppState.currentCategory);
@@ -1000,6 +976,32 @@ const ServicesController = {
             servicesList.innerHTML = '<p>Error al cargar los servicios.</p>';
             return;
         }
+
+    setupEventListeners() {
+        EventManager.delegate(
+            document.body,
+            '.saber-mas-button',
+            'click',
+            (event, button) => {
+                const serviceElement = button.closest('.service-item, .package-item');
+                if (!serviceElement) return;
+
+                const index = Array.from(serviceElement.parentNode.children)
+                    .indexOf(serviceElement);
+                const isPackage = serviceElement.classList.contains('package-item');
+                
+                if (isPackage) {
+                    const packageData = AppState.services.paquetes[index];
+                    PopupController.showPopup(packageData, index, true);
+                } else {
+                    const service = AppState.services[AppState.currentCategory][index];
+                    PopupController.showPopup(service, index);
+                }
+            }
+        );
+    },
+
+
 
         // Crear fragmento para mejor rendimiento
         const fragment = document.createDocumentFragment();
