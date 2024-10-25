@@ -827,7 +827,6 @@ const PerformanceMonitor = {
 // ==========================================
 // CONTROLADORES PRINCIPALES
 // ==========================================
-
 // ServicesController Mejorado
 const ServicesController = {
     async initialize() {
@@ -856,25 +855,34 @@ const ServicesController = {
                 return true;
             }
 
-            const response = await fetch('data.json');
+            // Cargar el JSON desde una URL absoluta
+            const response = await fetch('https://raw.githubusercontent.com/elitemassagemx/Home/main/data.json');
             if (!response.ok) throw new Error('Network response was not ok');
             
-            let text = await response.text();
-            text = text.replace(/\$\{BASE_URL\}/g, CONFIG.BASE_URL)
-                      .replace(/,\s*}/g, '}')
-                      .replace(/,\s*]/g, ']');
+            const data = await response.json();
             
-            const data = JSON.parse(text);
-            AppState.services = data.services;
+            // Procesar los datos y reemplazar BASE_URL
+            const baseUrl = 'https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/';
+            const processedData = JSON.parse(
+                JSON.stringify(data)
+                    .replace(/\$\{BASE_URL\}/g, baseUrl)
+                    .replace(/,\s*}/g, '}')
+                    .replace(/,\s*]/g, ']')
+            );
+
+            AppState.services = processedData.services;
             
             // Cachear los servicios
-            CacheManager.set('services', data.services);
+            CacheManager.set('services', processedData.services);
             
             // Precargar imágenes
             this.preloadServiceImages();
             
             const duration = PerformanceMonitor.endMeasure('loadServices');
             PerformanceMonitor.logPerformance('Services Load Time', duration);
+            
+            // Renderizar los servicios iniciales
+            this.renderInitialServices();
             
             return true;
         } catch (error) {
@@ -929,8 +937,18 @@ const ServicesController = {
         );
     },
 
+    setupServiceCategories() {
+        const categoryToggles = document.querySelectorAll('.service-category-toggle input[type="radio"]');
+        categoryToggles.forEach(toggle => {
+            EventManager.add(toggle, 'change', () => {
+                const category = toggle.value;
+                AppState.currentCategory = category;
+                this.renderServices(category);
+            });
+        });
+    },
+
     setupEventListeners() {
-        // Delegación de eventos para los botones "Saber más"
         EventManager.delegate(
             document.body,
             '.saber-mas-button',
@@ -982,6 +1000,64 @@ const ServicesController = {
             servicesList.innerHTML = '<p>Error al cargar los servicios.</p>';
             return;
         }
+
+        // Crear fragmento para mejor rendimiento
+        const fragment = document.createDocumentFragment();
+        
+        services.forEach((service, index) => {
+            const serviceElement = this.createServiceElement(service, index);
+            fragment.appendChild(serviceElement);
+        });
+
+        servicesList.appendChild(fragment);
+
+        if (AppState.activeBenefit !== 'all') {
+            this.filterServicesByBenefit(AppState.activeBenefit);
+        }
+
+        const duration = PerformanceMonitor.endMeasure('renderServicesList');
+        PerformanceMonitor.logPerformance('Services List Render', duration);
+    },
+
+    createServiceElement(service, index) {
+        const element = DOMManager.createElement('div');
+        const benefitClasses = service.benefits ? 
+            service.benefits.map(b => b.toLowerCase().replace(/\s+/g, '-')).join(' ') : '';
+        
+        element.className = `service-item ${benefitClasses}`;
+        
+        // Usar el sistema de templates para el contenido
+        element.innerHTML = DOMManager.renderTemplate('service-template', {
+            backgroundImage: ImageManager.buildImageUrl(service.backgroundImage),
+            icon: ImageManager.buildImageUrl(service.icon),
+            title: service.title,
+            description: service.description,
+            benefits: this.renderBenefits(service),
+            duration: service.duration
+        });
+
+        // Activar lazy loading para las imágenes
+        const images = element.querySelectorAll('img');
+        images.forEach(img => {
+            img.loading = 'lazy';
+            img.onerror = () => ImageManager.handleImageError(img);
+        });
+
+        return element;
+    },
+
+    filterServicesByBenefit(benefit) {
+        const services = document.querySelectorAll('.service-item');
+        services.forEach(service => {
+            if (benefit === 'all') {
+                DOMManager.setVisible(service, true);
+            } else {
+                const hasFilter = service.classList.contains(benefit);
+                DOMManager.setVisible(service, hasFilter);
+            }
+        });
+    }
+};
 
         // Crear fragmento para mejor rendimiento
         const fragment = document.createDocumentFragment();
