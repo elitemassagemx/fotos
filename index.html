@@ -64,23 +64,24 @@
             <div class="container">
                 <h2>Nuestros Servicios</h2>
                 
-                <div class="service-category-toggle">
+                <!-- Navegación de categorías -->
+                <div class="service-category-toggle" role="tablist">
                     <input type="radio" id="masajes" name="category" value="masajes" checked>
-                    <label for="masajes">
+                    <label for="masajes" role="tab" aria-selected="true">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/recomend.webp" 
                              alt="Icono Masajes" class="category-icon">
                         Masajes
                     </label>
                     
                     <input type="radio" id="experiencias" name="category" value="experiencias">
-                    <label for="experiencias">
+                    <label for="experiencias" role="tab">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/personal.webp" 
                              alt="Icono Experiencias" class="category-icon">
                         Experiencias
                     </label>
                     
                     <input type="radio" id="paquetes" name="category" value="paquetes">
-                    <label for="paquetes">
+                    <label for="paquetes" role="tab">
                         <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/paqp.webp" 
                              alt="Icono Paquetes" class="category-icon">
                         Paquetes
@@ -93,11 +94,11 @@
                     </a>
                 </div>
                 
-                <div class="benefits-nav"></div>
+                <!-- Navegación de beneficios -->
+                <div class="benefits-nav" role="toolbar" aria-label="Filtros de beneficios"></div>
                 
-                <div id="services-grid" class="services-grid">
-                    <!-- Services will be rendered here -->
-                </div>
+                <!-- Grid de servicios -->
+                <div id="services-grid" class="services-grid" role="tabpanel"></div>
             </div>
         </section>
 
@@ -183,15 +184,19 @@
     <div id="popup" class="popup">
         <div class="popup-content">
             <button class="close" aria-label="Cerrar">&times;</button>
-            <img id="popup-image" src="" alt="">
-            <h3 id="popup-title"></h3>
+            <div class="popup-header">
+                <img id="popup-image" src="" alt="">
+                <h3 id="popup-title"></h3>
+            </div>
             <p id="popup-description"></p>
-            <div class="popup-benefits"></div>
-            <div class="popup-includes"></div>
-            <div class="popup-duration">
-                <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/duration-icon.webp" 
-                     alt="" class="duration-icon">
-                <span id="popup-duration"></span>
+            <div class="popup-details">
+                <div class="popup-benefits"></div>
+                <div class="popup-includes"></div>
+                <div class="popup-duration">
+                    <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/duration-icon.webp" 
+                         alt="" class="duration-icon">
+                    <span id="popup-duration"></span>
+                </div>
             </div>
             <button id="whatsapp-button" class="whatsapp-button">
                 <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/whatsapp.webp" alt="WhatsApp">
@@ -203,20 +208,28 @@
     <!-- Templates -->
     <template id="service-template">
         <div class="service-item">
+            <div class="service-background"></div>
             <div class="service-content">
                 <div class="service-header">
                     <img class="service-icon" alt="">
                     <h3 class="service-title"></h3>
                 </div>
                 <p class="service-description"></p>
-                <div class="benefits-container"></div>
-                <div class="duration-container">
+                <div class="service-benefits"></div>
+                <div class="service-duration">
                     <img src="https://raw.githubusercontent.com/elitemassagemx/Home/main/IMG/duration-icon.webp" 
                          alt="" class="duration-icon">
                     <span class="duration-text"></span>
                 </div>
                 <button class="saber-mas-button">Saber más</button>
             </div>
+        </div>
+    </template>
+
+    <template id="benefit-template">
+        <div class="benefit-item">
+            <img class="benefit-icon" alt="">
+            <span class="benefit-text"></span>
         </div>
     </template>
 
