@@ -977,7 +977,7 @@ const ServicesController = {
             return;
         }
 
-    setupEventListeners() {
+    setupEventListeners() 
         EventManager.delegate(
             document.body,
             '.saber-mas-button',
